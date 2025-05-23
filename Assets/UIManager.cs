@@ -2,48 +2,48 @@ using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace HelloWorld
+
+
+
+public class UIManager : MonoBehaviour
 {
-    public class HelloWorldManager : MonoBehaviour
+    //private NetworkManager m_NetworkManager;
+
+    void Awake()
     {
-        //private NetworkManager m_NetworkManager;
+        //m_NetworkManager = this.GetComponent<NetworkManager>();
+    }
 
-        void Awake()
+    void OnGUI()
+    {
+        GUILayout.BeginArea(new Rect(10, 10, 300, 300));
+        if (!NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer)
         {
-            //m_NetworkManager = this.GetComponent<NetworkManager>();
+            StartButtons();
+        }
+        else
+        {
+            StatusLabels();
+
         }
 
-        void OnGUI()
-        {
-            GUILayout.BeginArea(new Rect(10, 10, 300, 300));
-            if (!NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer)
-            {
-                StartButtons();
-            }
-            else
-            {
-                StatusLabels();
+        GUILayout.EndArea();
+    }
 
-            }
+    static void StartButtons()
+    {
+        if (GUILayout.Button("Host")) NetworkManager.Singleton.StartHost();
+        if (GUILayout.Button("Client")) NetworkManager.Singleton.StartClient();
+        if (GUILayout.Button("Server")) NetworkManager.Singleton.StartServer();
+    }
 
-            GUILayout.EndArea();
-        }
+    static void StatusLabels()
+    {
+        var mode = NetworkManager.Singleton.IsHost ?
+            "Host" : NetworkManager.Singleton.IsServer ? "Server" : "Client";
 
-        static void StartButtons()
-        {
-            if (GUILayout.Button("Host")) NetworkManager.Singleton.StartHost();
-            if (GUILayout.Button("Client")) NetworkManager.Singleton.StartClient();
-            if (GUILayout.Button("Server")) NetworkManager.Singleton.StartServer();
-        }
-
-        static void StatusLabels()
-        {
-            var mode = NetworkManager.Singleton.IsHost ?
-                "Host" : NetworkManager.Singleton.IsServer ? "Server" : "Client";
-
-            GUILayout.Label("Transport: " +
-                NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetType().Name);
-            GUILayout.Label("Mode: " + mode);
-        }
+        GUILayout.Label("Transport: " +
+            NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetType().Name);
+        GUILayout.Label("Mode: " + mode);
     }
 }

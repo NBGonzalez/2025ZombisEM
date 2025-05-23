@@ -65,7 +65,7 @@ public class PlayerController : NetworkBehaviour
         HandleAnimationsRequestRpc(horizontalInput, verticalInput);
     }
 
-    [Rpc(SendTo.Server)]
+    [Rpc(SendTo.Everyone)]
     void MovePlayerRequestRpc(float horizontalInput, float verticalInput)
     {
         if (cameraTransform == null) { return; }
@@ -89,7 +89,7 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    [Rpc(SendTo.Server)]
+    [Rpc(SendTo.Everyone)]
     void HandleAnimationsRequestRpc(float horizontalInput, float verticalInput)
     {
         // Animaciones basadas en la dirección del movimiento
