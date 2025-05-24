@@ -4,6 +4,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Netcode;
 
 public enum GameMode
 {
@@ -120,7 +121,7 @@ public class LevelManager : MonoBehaviour
         }
 
         SpawnTeams();
-        
+
         UpdateTeamUI();
     }
 
@@ -307,14 +308,32 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    private void SpawnPlayer(Vector3 spawnPosition, GameObject prefab)
+    private void SpawnPlayer(Vector3 spawnPosition, GameObject prefab, ulong clientId)
     {
+
+        //////////////////////////////// INTENTO DE SPAWN DE JUGADORES /////////////////////////
+
+
         Debug.Log($"Instanciando jugador en {spawnPosition}");
         if (prefab != null)
         {
             Debug.Log($"Instanciando jugador en {spawnPosition}");
             // Crear una instancia del prefab en el punto especificado
+
+
+            // Verifica si el jugador ya existe en el diccionario
+            if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
+            {
+                // Si ya tiene un objeto de jugador, no hace nada
+                if (client.PlayerObject != null)
+                    return;
+            }
+
+            // Instancia el nuevo jugador y lo asigna al cliente
             GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
+            NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
+            playerNetworkObject.SpawnAsPlayerObject(clientId, true); // El 'true' permite que el dueño sea el cliente
+
             player.tag = "Player";
 
             // Obtener la referencia a la cámara principal
@@ -358,13 +377,24 @@ public class LevelManager : MonoBehaviour
         {
             Debug.LogError("Faltan referencias al prefab o al punto de aparición.");
         }
+
     }
 
     private void SpawnTeams()
     {
         Debug.Log("Instanciando equipos");
         if (humanSpawnPoints.Count <= 0) { return; }
-        SpawnPlayer(humanSpawnPoints[0], playerPrefab);
+
+        //Me hace un spawn por clienID
+        int spawnPoint = 0;
+        foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
+        {
+            SpawnPlayer(humanSpawnPoints[0], playerPrefab, clientId);
+            
+            Console.WriteLine("TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
+            spawnPoint++;
+        }
+            
         Debug.Log($"Personaje jugable instanciado en {humanSpawnPoints[0]}");
 
         for (int i = 1; i < numberOfHumans; i++)

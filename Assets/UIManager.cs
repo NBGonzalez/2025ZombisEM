@@ -14,7 +14,7 @@ using UnityEngine;
 public class UIManager : MonoBehaviour
 {
     //private NetworkManager m_NetworkManager;
-    const int maxConnections = 10;
+    public const int maxConnections = 10;
     string joinCode = "Enter room code...";
 
     void Awake()

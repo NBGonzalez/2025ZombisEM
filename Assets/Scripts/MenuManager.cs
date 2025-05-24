@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Netcode;
 
 public class MenuManager : MonoBehaviour
 {
@@ -10,7 +11,9 @@ public class MenuManager : MonoBehaviour
 
     public void StartGame()
     {
-        SceneManager.LoadScene("GameScene"); // Cambia "MainScene" por el nombre de tu escena principal
+        NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single); 
+        //NetworkManager.Singleton.SceneManager.LoadScene("NombreDeLaEscena", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        //SceneManager.LoadScene("GameScene"); // Cambia "MainScene" por el nombre de tu escena principal
     }
 
     public void QuitGame()

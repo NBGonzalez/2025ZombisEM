@@ -1,6 +1,8 @@
 using TMPro;
 using UnityEngine;
 using Unity.Netcode;
+using Unity.VisualScripting;
+using System;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -74,7 +76,26 @@ public class PlayerController : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     void MovePlayerRequestRpc(float horizontalInput, float verticalInput)
     {
-        if (cameraTransform == null) { return; }
+        //if(cameraTransform == null) { return; }
+        //if (cameraTransform == null && IsOwner)
+        //{
+        //    GameObject camara = new GameObject();
+
+        //    Console.WriteLine("Camara creada");
+
+        //    camara.AddComponent<Camera>();
+        //    camara.AddComponent<CameraController>();
+            
+        //    camara.GetComponent<CameraController>().player = this.transform;
+        //    camara.GetComponent<CameraController>().offset = this.transform.position + new Vector3(0, 2, -5);
+        //    cameraTransform = camara.transform;
+
+        //    if (!IsOwner)
+        //    {
+        //        camara.SetActive(false);
+        //    }
+        //}
+
 
         // Calcular la dirección de movimiento en relación a la cámara
         Vector3 moveDirection = (cameraTransform.forward * verticalInput + cameraTransform.right * horizontalInput).normalized;

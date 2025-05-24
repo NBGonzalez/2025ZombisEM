@@ -1,6 +1,7 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class CameraController : MonoBehaviour
+public class CameraController : NetworkBehaviour
 {
     public Transform player;            // Referencia al jugador
     public Vector3 offset = new Vector3(0f, 2f, -5f);  // Desplazamiento desde el jugador
@@ -12,8 +13,15 @@ public class CameraController : MonoBehaviour
     private float yaw = 0f;             // Rotación alrededor del eje Y
     private float pitch = 2f;           // Inclinación hacia arriba/abajo (eje X)
 
+
+
+
     void LateUpdate()
     {
+        if (NetworkManager.IsConnectedClient)
+        {
+            OnSpawn();
+        }
         if (player == null)
         {
             Debug.LogWarning("Player reference is missing.");
@@ -22,6 +30,18 @@ public class CameraController : MonoBehaviour
 
         HandleCameraRotation();
         UpdateCameraPosition();
+    }
+
+    void OnSpawn()
+    {
+        if (IsOwner)
+        {
+            this.gameObject.SetActive(true);
+        }
+        else
+        {
+            this.gameObject.SetActive(false);
+        }
     }
 
     private void HandleCameraRotation()
