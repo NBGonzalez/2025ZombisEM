@@ -51,9 +51,15 @@ public class PlayerController : NetworkBehaviour
 
         UpdateCoinUI();
     }
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+    }
 
     void Update()
     {
+        if (!IsSpawned) return;
+
         // Leer entrada del teclado
         horizontalInput = Input.GetAxis("Horizontal");
         verticalInput = Input.GetAxis("Vertical");
