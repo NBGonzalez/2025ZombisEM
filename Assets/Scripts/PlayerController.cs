@@ -6,6 +6,7 @@ using System;
 
 public class PlayerController : NetworkBehaviour
 {
+
     private TextMeshProUGUI coinText;
 
     [Header("Stats")]
