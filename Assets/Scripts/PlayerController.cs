@@ -3,6 +3,8 @@ using UnityEngine;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using System;
+using Unity.Collections;
+using System.Runtime.ConstrainedExecution;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -25,10 +27,20 @@ public class PlayerController : NetworkBehaviour
     private float horizontalInput;         // Entrada horizontal (A/D o flechas)
     private float verticalInput;           // Entrada vertical (W/S o flechas)
 
+    // Nombre del jugador
+    public NetworkVariable<FixedString64Bytes> networkName = new(writePerm: NetworkVariableWritePermission.Server);
+    public string name;
+    public GameObject textName;
+
     void Start()
     {
         // Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");
+
+        //Esto es para el nombre
+        //textName.GetComponent<TextMeshPro>().text = networkName.Value.ToString();
+        networkName.OnValueChanged += NameChange;
+        
 
         if (!IsOwner)
         {
@@ -57,6 +69,14 @@ public class PlayerController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+    }
+
+    public void NameChange(FixedString64Bytes previousValue, FixedString64Bytes newValue)
+    {
+        //networkName.Value = newValue.ToString();
+        //textName.GetComponent<TextMeshPro>().SetText(newValue.ToString());
+        this.gameObject.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = newValue.ToString();
+        //textName.GetComponentInChildren<TextMeshPro>().text = newValue.ToString();
     }
 
     void Update()
