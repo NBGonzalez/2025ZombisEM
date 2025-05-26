@@ -360,7 +360,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bac0506991b3ba5439b9b74b7d0f61a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  camera: {fileID: 4682121791419349958}
+  camera: {fileID: 0}
+  playerOwner: {fileID: 0}
 --- !u!1001 &8136386398380760629
 PrefabInstance:
   m_ObjectHideFlags: 0
