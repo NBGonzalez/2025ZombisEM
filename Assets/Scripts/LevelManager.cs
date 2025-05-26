@@ -34,8 +34,8 @@ public class LevelManager : MonoBehaviour
     [Tooltip("Tiempo de partida en minutos para el modo tiempo")]
     [SerializeField] private int minutes = 5;
 
-    private List<Vector3> humanSpawnPoints = new List<Vector3>();
-    private List<Vector3> zombieSpawnPoints = new List<Vector3>();
+    public List<Vector3> humanSpawnPoints = new List<Vector3>();
+    public List<Vector3> zombieSpawnPoints = new List<Vector3>();
 
     // Referencias a los elementos de texto en el canvas
     private TextMeshProUGUI humansText;
@@ -330,9 +330,12 @@ public class LevelManager : MonoBehaviour
             }
 
             // Instancia el nuevo jugador y lo asigna al cliente
-            GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
+            //GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
+            GameObject player = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.gameObject;
             NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
             playerNetworkObject.SpawnAsPlayerObject(clientId, true); // El 'true' permite que el dueño sea el cliente
+            player.transform.position = spawnPosition; // Asegurarse de que el jugador aparezca en la posición correcta
+            
 
             player.tag = "Player";
 
@@ -385,16 +388,20 @@ public class LevelManager : MonoBehaviour
         Debug.Log("Instanciando equipos");
         if (humanSpawnPoints.Count <= 0) { return; }
 
-        //Me hace un spawn por clienID
-        int spawnPoint = 0;
-        foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
+        //Me hace un spawn por clientID
+        if (NetworkManager.Singleton.IsHost)
         {
-            SpawnPlayer(humanSpawnPoints[0], playerPrefab, clientId);
-            
-            Console.WriteLine("TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
-            spawnPoint++;
+            int spawnPoint = 0;
+            foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                SpawnPlayer(humanSpawnPoints[spawnPoint], playerPrefab, clientId);
+
+                Console.WriteLine("-------------------------------------TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
+                spawnPoint++;
+            }
         }
-            
+
+
         Debug.Log($"Personaje jugable instanciado en {humanSpawnPoints[0]}");
 
         for (int i = 1; i < numberOfHumans; i++)

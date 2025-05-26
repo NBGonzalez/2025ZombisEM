@@ -28,7 +28,9 @@ public class PlayerController : NetworkBehaviour
     private float verticalInput;           // Entrada vertical (W/S o flechas)
 
     // Nombre del jugador
-    public NetworkVariable<FixedString64Bytes> networkName = new(writePerm: NetworkVariableWritePermission.Owner);
+    public NetworkVariable<FixedString64Bytes> networkName = new(writePerm: NetworkVariableWritePermission.Owner, 
+                                                                 readPerm: NetworkVariableReadPermission.Everyone);
+        
     public string name;
     public GameObject textName;
 
@@ -69,10 +71,13 @@ public class PlayerController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+        networkName.OnValueChanged += NameChange;
     }
+
 
     public void NameChange(FixedString64Bytes previousValue, FixedString64Bytes newValue)
     {
+        name = newValue.ToString();
         this.gameObject.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = newValue.ToString();
     }
 
