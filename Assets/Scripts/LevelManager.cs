@@ -125,7 +125,7 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        remainingSeconds = minutes * 60;
+        remainingSeconds = minutes * 5;
 
         // Obtener los puntos de aparición y el número de monedas generadas desde LevelBuilder
         if (levelBuilder != null)
@@ -532,6 +532,7 @@ public class LevelManager : MonoBehaviour
         Cursor.visible = false; // Oculta el cursor
 
         // Cargar la escena del menú principal
+        
         SceneManager.LoadScene("MenuScene"); // Cambia "MenuScene" por el nombre de tu escena principal
     }
 
