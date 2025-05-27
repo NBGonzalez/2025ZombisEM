@@ -157,6 +157,12 @@ public class UIManager : MonoBehaviour
     // Cuando todos los jugadores han puesto su nombre, se inicia el juego.
     public void StartGame()
     {
+        var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+        foreach (var player in allPlayers)
+        {
+            player.GetComponent<NetworkObject>().Despawn();
+        }
+
         NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
         //SceneManager.LoadScene("GameScene"); // Cambia "MainScene" por el nombre de tu escena principal
 

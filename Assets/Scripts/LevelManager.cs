@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 
 public enum GameMode
 {
@@ -346,12 +347,12 @@ public class LevelManager : MonoBehaviour
             }
 
             // Instancia el nuevo jugador y lo asigna al cliente
-            //GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
-            GameObject player = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.gameObject;
+
+            GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
+            //GameObject player = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.gameObject;
+            //NetworkTransform playerTransform = player.GetComponent<NetworkTransform>();
             NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
             playerNetworkObject.SpawnAsPlayerObject(clientId, true); // El 'true' permite que el dueño sea el cliente
-            player.transform.position = spawnPosition; // Asegurarse de que el jugador aparezca en la posición correcta
-            
 
             player.tag = "Player";
 
