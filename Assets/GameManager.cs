@@ -14,7 +14,7 @@ public class GameManager : NetworkBehaviour
     int playerId;
     public static GameManager Instance { get; private set; }
 
-    public string gameMode;
+    // Variable de red para sincronizar el modo de juego entre el servidor y los clientes
     NetworkVariable<FixedString64Bytes> networkGameMode = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
 
     private void Awake()
@@ -29,11 +29,7 @@ public class GameManager : NetworkBehaviour
             Destroy(gameObject); // Esto evita múltiples instancias
         }
 
-        networkGameMode.OnValueChanged += (oldValue, newValue) => {
-            Debug.Log($"Sincronizado en cliente: {newValue}");
-            gameMode = newValue.ToString(); // Guarda también en variable normal
-        };
-
+        networkGameMode.OnValueChanged += (oldValue, newValue) => { Debug.Log($"Sincronizado en cliente: {newValue}"); };
 
         }
 
@@ -78,5 +74,9 @@ public class GameManager : NetworkBehaviour
     public void SetGameMode(string mode)
     {
         networkGameMode.Value = mode;
+    }
+    public string GetGameMode()
+    {
+        return networkGameMode.Value.ToString();
     }
 }

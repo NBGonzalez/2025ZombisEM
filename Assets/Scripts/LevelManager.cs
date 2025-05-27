@@ -81,11 +81,11 @@ public class LevelManager : MonoBehaviour
     private void Start()
     {
         // Obtener el modo de juego desde GameManager
-        if(gameManager.gameMode == "CoinGame")
+        if(gameManager.GetGameMode() == "CoinGame")
         {
             gameMode = GameMode.Monedas;
         }
-        else if(gameManager.gameMode == "TimeGame")
+        else if(gameManager.GetGameMode() == "TimeGame")
         {
             gameMode = GameMode.Tiempo;
         }
