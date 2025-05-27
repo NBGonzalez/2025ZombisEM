@@ -13,9 +13,19 @@ public class GameManager : NetworkBehaviour
     int playerId;
     public static GameManager Instance { get; private set; }
 
+    public string gameMode;
+
     private void Awake()
     {
-        DontDestroyOnLoad(this);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(this);
+        }
+        else
+        {
+            Destroy(gameObject); // Esto evita múltiples instancias
+        }
     }
 
     // Start is called before the first frame update
@@ -48,5 +58,10 @@ public class GameManager : NetworkBehaviour
     void Update()
     {
         
+    }
+    public void SetGameMode(string mode)
+    {
+        gameMode = mode;
+        Debug.Log("Game mode set to: " + gameMode);
     }
 }

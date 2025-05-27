@@ -18,9 +18,13 @@ public class UIManager : MonoBehaviour
 
     public const int maxConnections = 10;
     public string joinCode = "Enter room code...";
+    public string gameModeSelected;
+
+    public GameManager gameManager;
 
     //Paneles:
     public GameObject relayPanel;
+    public GameObject GamemodePanel;
     public GameObject namePanel;
     public GameObject finalPanel;
     public GameObject STATUSPANEL;
@@ -31,37 +35,10 @@ public class UIManager : MonoBehaviour
     {
         Time.timeScale = 1f; // Asegúrate de que el tiempo está restaurado al cargar la escena
         relayPanel.SetActive(true);
+        
     }
-
-
-    public void StartGame()
-    {
-        NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
-        //SceneManager.LoadScene("GameScene"); // Cambia "MainScene" por el nombre de tu escena principal
-
-    }
-
-    public void NamePanel()
-    {
-        namePanel.SetActive(false);
-        name = inputName.text;
-
-        var allPlayers = GameObject.FindGameObjectsWithTag("Player");
-        foreach (var player in allPlayers)
-        {
-            if (player.GetComponent<NetworkObject>().IsOwner)
-            {
-                player.GetComponent<PlayerController>().networkName.Value = name;
-            }
-            else
-            {
-                player.gameObject.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = player.GetComponent<PlayerController>().networkName.Value.ToString();
-            }
-
-        }
-        Debug.Log(name);
-        finalPanel.SetActive(true);
-    }
+    
+    // Primero salen los paneles de Relay.
     public async void StartHost()
     {
         await UnityServices.InitializeAsync();
@@ -77,7 +54,7 @@ public class UIManager : MonoBehaviour
 
         // Una vez que el host se ha iniciado, ocultamos el panel de Relay y mostramos el panel de nombre
         relayPanel.SetActive(false);
-        namePanel.SetActive(true);
+        GamemodePanel.SetActive(true);
         StatusLabels();
     }
     public async void StartClient()
@@ -96,7 +73,9 @@ public class UIManager : MonoBehaviour
 
         // Una vez que el host se ha iniciado, ocultamos el panel de Relay y mostramos el panel de nombre
         relayPanel.SetActive(false);
+
         namePanel.SetActive(true);
+
         StatusLabels();
     }
 
@@ -119,6 +98,54 @@ public class UIManager : MonoBehaviour
         STATUSPANEL.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = "Room: " + joinCode;
     }
 
+    
+    // Si eres Host, muestra el panel de Gamemode.
+    public void CoinGameModeSelected()
+    {
+        gameModeSelected = "CoinGame";
+        gameManager.SetGameMode(gameModeSelected);
+        GamemodePanel.SetActive(false);
+        namePanel.SetActive(true);
+    }
+    public void TimeGameModeSelected()
+    {
+        gameModeSelected = "TimeGame";
+        gameManager.SetGameMode(gameModeSelected);
+        GamemodePanel.SetActive(false);
+        namePanel.SetActive(true);
+    }
+
+
+    // A todos, muestra el panel de nombre
+    public void NamePanel()
+    {
+        namePanel.SetActive(false);
+        name = inputName.text;
+
+        var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+        foreach (var player in allPlayers)
+        {
+            if (player.GetComponent<NetworkObject>().IsOwner)
+            {
+                player.GetComponent<PlayerController>().networkName.Value = name;
+            }
+            else
+            {
+                player.gameObject.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = player.GetComponent<PlayerController>().networkName.Value.ToString();
+            }
+
+        }
+        Debug.Log(name);
+        finalPanel.SetActive(true);
+    }
+
+    // Cuando todos los jugadores han puesto su nombre, se inicia el juego.
+    public void StartGame()
+    {
+        NetworkManager.Singleton.SceneManager.LoadScene("GameScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        //SceneManager.LoadScene("GameScene"); // Cambia "MainScene" por el nombre de tu escena principal
+
+    }
 
     public void QuitGame()
     {

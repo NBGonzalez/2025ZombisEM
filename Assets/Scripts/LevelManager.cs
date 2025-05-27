@@ -57,6 +57,8 @@ public class LevelManager : MonoBehaviour
 
     public GameObject gameOverPanel; // Asigna el panel desde el inspector
 
+    public GameManager gameManager;
+
     #endregion
 
     #region Unity game loop methods
@@ -72,10 +74,23 @@ public class LevelManager : MonoBehaviour
         levelBuilder = GetComponent<LevelBuilder>();
 
         Time.timeScale = 1f; // Asegurarse de que el tiempo no esté detenido
+
+        gameManager = GameManager.Instance; // Obtener la instancia del GameManager
     }
 
     private void Start()
     {
+        // Obtener el modo de juego desde GameManager
+        if(gameManager.gameMode == "CoinGame")
+        {
+            gameMode = GameMode.Monedas;
+        }
+        else if(gameManager.gameMode == "TimeGame")
+        {
+            gameMode = GameMode.Tiempo;
+        }
+
+
         Debug.Log("Iniciando el nivel");
         // Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");

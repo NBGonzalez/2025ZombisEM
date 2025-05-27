@@ -29,6 +29,6 @@ public class NamePlayers : MonoBehaviour
     void Update()
     {
 
-        transform.rotation = Quaternion.LookRotation(this.transform.position - camera.transform.position);
+        //transform.rotation = Quaternion.LookRotation(this.transform.position - camera.transform.position);
     }
 }
