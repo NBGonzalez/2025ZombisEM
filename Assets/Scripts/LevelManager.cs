@@ -4,6 +4,8 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Netcode;
+using Unity.Netcode.Components;
 
 public enum GameMode
 {
@@ -33,8 +35,8 @@ public class LevelManager : MonoBehaviour
     [Tooltip("Tiempo de partida en minutos para el modo tiempo")]
     [SerializeField] private int minutes = 5;
 
-    private List<Vector3> humanSpawnPoints = new List<Vector3>();
-    private List<Vector3> zombieSpawnPoints = new List<Vector3>();
+    public List<Vector3> humanSpawnPoints = new List<Vector3>();
+    public List<Vector3> zombieSpawnPoints = new List<Vector3>();
 
     // Referencias a los elementos de texto en el canvas
     private TextMeshProUGUI humansText;
@@ -56,6 +58,8 @@ public class LevelManager : MonoBehaviour
 
     public GameObject gameOverPanel; // Asigna el panel desde el inspector
 
+    public GameManager gameManager;
+
     #endregion
 
     #region Unity game loop methods
@@ -71,10 +75,24 @@ public class LevelManager : MonoBehaviour
         levelBuilder = GetComponent<LevelBuilder>();
 
         Time.timeScale = 1f; // Asegurarse de que el tiempo no esté detenido
+
+        gameManager = GameManager.Instance; // Obtener la instancia del GameManager
     }
 
     private void Start()
     {
+        // Obtener el modo de juego desde GameManager
+        if(gameManager.CurrentGameMode == "CoinGame")
+        {
+            gameMode = GameMode.Monedas;
+        }
+        else if(gameManager.CurrentGameMode == "TimeGame")
+        {
+            gameMode = GameMode.Tiempo;
+        }
+
+        minutes = gameManager.GetTime(); // Asignar el tiempo de partida desde GameManager
+
         Debug.Log("Iniciando el nivel");
         // Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");
@@ -108,7 +126,7 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        remainingSeconds = minutes * 60;
+        remainingSeconds = minutes * 5;
 
         // Obtener los puntos de aparición y el número de monedas generadas desde LevelBuilder
         if (levelBuilder != null)
@@ -120,7 +138,7 @@ public class LevelManager : MonoBehaviour
         }
 
         SpawnTeams();
-        
+
         UpdateTeamUI();
     }
 
@@ -307,14 +325,35 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    private void SpawnPlayer(Vector3 spawnPosition, GameObject prefab)
+    private void SpawnPlayer(Vector3 spawnPosition, GameObject prefab, ulong clientId)
     {
+
+        //////////////////////////////// INTENTO DE SPAWN DE JUGADORES /////////////////////////
+
+
         Debug.Log($"Instanciando jugador en {spawnPosition}");
         if (prefab != null)
         {
             Debug.Log($"Instanciando jugador en {spawnPosition}");
             // Crear una instancia del prefab en el punto especificado
+
+
+            // Verifica si el jugador ya existe en el diccionario
+            if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
+            {
+                // Si ya tiene un objeto de jugador, no hace nada
+                if (client.PlayerObject != null)
+                    return;
+            }
+
+            // Instancia el nuevo jugador y lo asigna al cliente
+
             GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
+            //GameObject player = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.gameObject;
+            //NetworkTransform playerTransform = player.GetComponent<NetworkTransform>();
+            NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
+            playerNetworkObject.SpawnAsPlayerObject(clientId, true); // El 'true' permite que el dueño sea el cliente
+
             player.tag = "Player";
 
             // Obtener la referencia a la cámara principal
@@ -358,13 +397,28 @@ public class LevelManager : MonoBehaviour
         {
             Debug.LogError("Faltan referencias al prefab o al punto de aparición.");
         }
+
     }
 
     private void SpawnTeams()
     {
         Debug.Log("Instanciando equipos");
         if (humanSpawnPoints.Count <= 0) { return; }
-        SpawnPlayer(humanSpawnPoints[0], playerPrefab);
+
+        //Me hace un spawn por clientID
+        if (NetworkManager.Singleton.IsHost)
+        {
+            int spawnPoint = 0;
+            foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                SpawnPlayer(humanSpawnPoints[spawnPoint], playerPrefab, clientId);
+
+                Console.WriteLine("-------------------------------------TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
+                spawnPoint++;
+            }
+        }
+
+
         Debug.Log($"Personaje jugable instanciado en {humanSpawnPoints[0]}");
 
         for (int i = 1; i < numberOfHumans; i++)
@@ -479,6 +533,7 @@ public class LevelManager : MonoBehaviour
         Cursor.visible = false; // Oculta el cursor
 
         // Cargar la escena del menú principal
+        
         SceneManager.LoadScene("MenuScene"); // Cambia "MenuScene" por el nombre de tu escena principal
     }
 

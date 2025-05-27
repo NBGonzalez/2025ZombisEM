@@ -1,9 +1,14 @@
 using TMPro;
 using UnityEngine;
 using Unity.Netcode;
+using Unity.VisualScripting;
+using System;
+using Unity.Collections;
+using System.Runtime.ConstrainedExecution;
 
 public class PlayerController : NetworkBehaviour
 {
+
     private TextMeshProUGUI coinText;
 
     [Header("Stats")]
@@ -22,10 +27,22 @@ public class PlayerController : NetworkBehaviour
     private float horizontalInput;         // Entrada horizontal (A/D o flechas)
     private float verticalInput;           // Entrada vertical (W/S o flechas)
 
+    // Nombre del jugador
+    public NetworkVariable<FixedString64Bytes> networkName = new(writePerm: NetworkVariableWritePermission.Owner, 
+                                                                 readPerm: NetworkVariableReadPermission.Everyone);
+        
+    public string name;
+    public GameObject textName;
+
     void Start()
     {
         // Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");
+
+        //Esto es para el nombre
+        //textName.GetComponent<TextMeshPro>().text = networkName.Value.ToString();
+        networkName.OnValueChanged += NameChange;
+        
 
         if (!IsOwner)
         {
@@ -54,6 +71,14 @@ public class PlayerController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+        networkName.OnValueChanged += NameChange;
+    }
+
+
+    public void NameChange(FixedString64Bytes previousValue, FixedString64Bytes newValue)
+    {
+        name = newValue.ToString();
+        this.gameObject.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = newValue.ToString();
     }
 
     void Update()
@@ -74,7 +99,26 @@ public class PlayerController : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost)]
     void MovePlayerRequestRpc(float horizontalInput, float verticalInput)
     {
-        if (cameraTransform == null) { return; }
+        //if(cameraTransform == null) { return; }
+        //if (cameraTransform == null && IsOwner)
+        //{
+        //    GameObject camara = new GameObject();
+
+        //    Console.WriteLine("Camara creada");
+
+        //    camara.AddComponent<Camera>();
+        //    camara.AddComponent<CameraController>();
+            
+        //    camara.GetComponent<CameraController>().player = this.transform;
+        //    camara.GetComponent<CameraController>().offset = this.transform.position + new Vector3(0, 2, -5);
+        //    cameraTransform = camara.transform;
+
+        //    if (!IsOwner)
+        //    {
+        //        camara.SetActive(false);
+        //    }
+        //}
+
 
         // Calcular la dirección de movimiento en relación a la cámara
         Vector3 moveDirection = (cameraTransform.forward * verticalInput + cameraTransform.right * horizontalInput).normalized;
