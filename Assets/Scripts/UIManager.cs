@@ -29,6 +29,7 @@ public class UIManager : MonoBehaviour
     public GameObject namePanel;
     public GameObject finalPanel;
     public GameObject STATUSPANEL;
+    public GameObject titlePanel;
 
 
 
@@ -36,6 +37,7 @@ public class UIManager : MonoBehaviour
     {
         Time.timeScale = 1f; // Asegúrate de que el tiempo está restaurado al cargar la escena
         relayPanel.SetActive(true);
+        titlePanel.SetActive(true);
         
     }
 
