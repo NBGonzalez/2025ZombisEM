@@ -29,6 +29,7 @@ public class UIManager : MonoBehaviour
     public GameObject namePanel;
     public GameObject finalPanel;
     public GameObject STATUSPANEL;
+    public GameObject titlePanel;
 
 
 
@@ -36,7 +37,8 @@ public class UIManager : MonoBehaviour
     {
         Time.timeScale = 1f; // Asegúrate de que el tiempo está restaurado al cargar la escena
         relayPanel.SetActive(true);
-        
+        titlePanel.SetActive(true);
+
     }
 
     
@@ -94,8 +96,8 @@ public class UIManager : MonoBehaviour
         var mode = NetworkManager.Singleton.IsHost ?
             "Host" : NetworkManager.Singleton.IsServer ? "Server" : "Client";
 
-        STATUSPANEL.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Transport: " +
-            NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetType().Name;
+        //STATUSPANEL.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Transport: " +
+            //NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetType().Name;
         STATUSPANEL.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Mode: " + mode;
         STATUSPANEL.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = "Room: " + joinCode;
     }
