@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -14,6 +15,7 @@ public class GameManager : NetworkBehaviour
     public static GameManager Instance { get; private set; }
 
     public string gameMode;
+    NetworkVariable<FixedString64Bytes> networkGameMode = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
 
     private void Awake()
     {
@@ -26,11 +28,24 @@ public class GameManager : NetworkBehaviour
         {
             Destroy(gameObject); // Esto evita múltiples instancias
         }
-    }
+
+        networkGameMode.OnValueChanged += (oldValue, newValue) => {
+            Debug.Log($"Sincronizado en cliente: {newValue}");
+            gameMode = newValue.ToString(); // Guarda también en variable normal
+        };
+
+
+        }
 
     // Start is called before the first frame update
     void Start()
     {
+
+        if (IsServer)
+        {
+            GetComponent<NetworkObject>().Spawn();
+        }
+
         maxPlayers = UIManager.maxConnections;
 
         _networkManager = NetworkManager.Singleton;
@@ -59,9 +74,9 @@ public class GameManager : NetworkBehaviour
     {
         
     }
+
     public void SetGameMode(string mode)
     {
-        gameMode = mode;
-        Debug.Log("Game mode set to: " + gameMode);
+        networkGameMode.Value = mode;
     }
 }

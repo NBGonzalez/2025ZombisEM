@@ -37,6 +37,7 @@ public class UIManager : MonoBehaviour
         relayPanel.SetActive(true);
         
     }
+
     
     // Primero salen los paneles de Relay.
     public async void StartHost()
