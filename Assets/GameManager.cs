@@ -16,6 +16,7 @@ public class GameManager : NetworkBehaviour
 
     // Variable de red para sincronizar el modo de juego entre el servidor y los clientes
     NetworkVariable<FixedString64Bytes> networkGameMode = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
+    NetworkVariable<int> networkTime = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
 
     private void Awake()
     {
@@ -30,6 +31,7 @@ public class GameManager : NetworkBehaviour
         }
 
         networkGameMode.OnValueChanged += (oldValue, newValue) => { Debug.Log($"Sincronizado en cliente: {newValue}"); };
+        networkTime.OnValueChanged += (oldValue, newValue) => { Debug.Log($"Tiempo sincronizado en cliente: {newValue}"); };
 
         }
 
@@ -71,6 +73,12 @@ public class GameManager : NetworkBehaviour
         
     }
 
+    #region GAMEMODE
+    public string CurrentGameMode
+    {
+        get => networkGameMode.Value.ToString();
+        set => networkGameMode.Value = value;
+    }
     public void SetGameMode(string mode)
     {
         networkGameMode.Value = mode;
@@ -79,4 +87,16 @@ public class GameManager : NetworkBehaviour
     {
         return networkGameMode.Value.ToString();
     }
+    #endregion
+
+    #region TIME
+    public void SetTime(int time)
+    {
+        networkTime.Value = time;
+    }
+    public int GetTime()
+    {
+        return networkTime.Value;
+    }
+    #endregion
 }

@@ -24,7 +24,8 @@ public class UIManager : MonoBehaviour
 
     //Paneles:
     public GameObject relayPanel;
-    public GameObject GamemodePanel;
+    public GameObject gamemodePanel;
+    public GameObject timeSelectionPanel;
     public GameObject namePanel;
     public GameObject finalPanel;
     public GameObject STATUSPANEL;
@@ -55,7 +56,7 @@ public class UIManager : MonoBehaviour
 
         // Una vez que el host se ha iniciado, ocultamos el panel de Relay y mostramos el panel de nombre
         relayPanel.SetActive(false);
-        GamemodePanel.SetActive(true);
+        gamemodePanel.SetActive(true);
         StatusLabels();
     }
     public async void StartClient()
@@ -104,15 +105,26 @@ public class UIManager : MonoBehaviour
     public void CoinGameModeSelected()
     {
         gameModeSelected = "CoinGame";
-        gameManager.SetGameMode(gameModeSelected);
-        GamemodePanel.SetActive(false);
+        //gameManager.SetGameMode(gameModeSelected);
+        gameManager.CurrentGameMode = gameModeSelected;
+        gamemodePanel.SetActive(false);
         namePanel.SetActive(true);
     }
     public void TimeGameModeSelected()
     {
         gameModeSelected = "TimeGame";
-        gameManager.SetGameMode(gameModeSelected);
-        GamemodePanel.SetActive(false);
+        //gameManager.SetGameMode(gameModeSelected);
+        gameManager.CurrentGameMode = gameModeSelected;
+        gamemodePanel.SetActive(false);
+        timeSelectionPanel.SetActive(true);
+    }
+
+    // Si eres Host, muestra el panel para poner el tiempo de juego.
+    public void TimeSelected(int time)
+    {
+        gameManager.SetTime(time);
+        Debug.Log("Tiempo seleccionado: " + time + " minutos.");
+        timeSelectionPanel.SetActive(false);
         namePanel.SetActive(true);
     }
 

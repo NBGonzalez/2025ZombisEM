@@ -81,15 +81,16 @@ public class LevelManager : MonoBehaviour
     private void Start()
     {
         // Obtener el modo de juego desde GameManager
-        if(gameManager.GetGameMode() == "CoinGame")
+        if(gameManager.CurrentGameMode == "CoinGame")
         {
             gameMode = GameMode.Monedas;
         }
-        else if(gameManager.GetGameMode() == "TimeGame")
+        else if(gameManager.CurrentGameMode == "TimeGame")
         {
             gameMode = GameMode.Tiempo;
         }
 
+        minutes = gameManager.GetTime(); // Asignar el tiempo de partida desde GameManager
 
         Debug.Log("Iniciando el nivel");
         // Buscar el objeto "CanvasPlayer" en la escena
