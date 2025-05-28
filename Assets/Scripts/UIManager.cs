@@ -9,6 +9,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Relay;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
+using UnityEditor;
 
 public class UIManager : MonoBehaviour
 {
@@ -31,13 +32,37 @@ public class UIManager : MonoBehaviour
     public GameObject STATUSPANEL;
     public GameObject titlePanel;
 
-
+    public static bool hasNetworkConnection = false;
 
     public void Awake()
     {
-        Time.timeScale = 1f; // Asegúrate de que el tiempo está restaurado al cargar la escena
-        relayPanel.SetActive(true);
-        titlePanel.SetActive(true);
+        //Si ya tenemos conexión de red, saltamos directo a la selección de modo
+        if (hasNetworkConnection && NetworkManager.Singleton != null &&
+            (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsClient))
+        {
+            // Vamos directo al panel de selección de modo si somos host
+            // o al panel de nombre si somos cliente
+            relayPanel.SetActive(false);
+            titlePanel.SetActive(false);
+
+            if (NetworkManager.Singleton.IsHost)
+            {
+                gamemodePanel.SetActive(true);
+            }
+            else
+            {
+                namePanel.SetActive(true);
+            }
+
+            StatusLabels();
+        }
+        else
+        {
+            // Primera vez, mostramos los paneles de conexión
+            relayPanel.SetActive(true);
+            titlePanel.SetActive(true);
+            hasNetworkConnection = false;
+        }
 
     }
 
@@ -55,7 +80,7 @@ public class UIManager : MonoBehaviour
         joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
 
         NetworkManager.Singleton.StartHost();
-
+        hasNetworkConnection = true;
         // Una vez que el host se ha iniciado, ocultamos el panel de Relay y mostramos el panel de nombre
         relayPanel.SetActive(false);
         gamemodePanel.SetActive(true);
@@ -74,7 +99,7 @@ public class UIManager : MonoBehaviour
         var allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
         NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(allocation, "dtls"));
         NetworkManager.Singleton.StartClient();
-
+        hasNetworkConnection = true;
         // Una vez que el host se ha iniciado, ocultamos el panel de Relay y mostramos el panel de nombre
         relayPanel.SetActive(false);
 
@@ -167,13 +192,37 @@ public class UIManager : MonoBehaviour
         //SceneManager.LoadScene("GameScene"); // Cambia "MainScene" por el nombre de tu escena principal
 
     }
+    public void RestartGame()
+    {
+        // Resetear los paneles
+        relayPanel.SetActive(false);
+        titlePanel.SetActive(false);
+        gamemodePanel.SetActive(false);
+        timeSelectionPanel.SetActive(false);
+        namePanel.SetActive(false);
+        finalPanel.SetActive(false);
 
+        // Mostrar el panel apropiado según el rol
+        if (NetworkManager.Singleton.IsHost)
+        {
+            gamemodePanel.SetActive(true);
+        }
+        else
+        {
+            namePanel.SetActive(true);
+        }
+
+        StatusLabels();
+    }
     public void QuitGame()
     {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false; // Salir en el editor
-#else
-            Application.Quit(); // Salir en una build
-#endif
+        // Resetear la conexión al salir completamente
+        hasNetworkConnection = false;
+
+        // Desconectar de la red
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.Shutdown();
+        }
     }
 }
