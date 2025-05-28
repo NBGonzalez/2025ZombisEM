@@ -94,10 +94,10 @@ public class PlayerController : NetworkBehaviour
         MovePlayerRequestRpc(horizontalInput, verticalInput);
 
         // Manejar las animaciones del jugador
-        HandleAnimationsRequestRpc(horizontalInput, verticalInput);
+        HandleAnimations(horizontalInput, verticalInput);
     }
 
-    [Rpc(SendTo.ClientsAndHost)]
+    [Rpc(SendTo.Everyone)]
     void MovePlayerRequestRpc(float horizontalInput, float verticalInput)
     {
         //if(cameraTransform == null) { return; }
@@ -140,8 +140,8 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    [Rpc(SendTo.ClientsAndHost)]
-    void HandleAnimationsRequestRpc(float horizontalInput, float verticalInput)
+    //[Rpc(SendTo.ClientsAndHost)]
+    void HandleAnimations(float horizontalInput, float verticalInput)
     {
         // Animaciones basadas en la dirección del movimiento
         animator.SetFloat("Speed", Mathf.Abs(horizontalInput) + Mathf.Abs(verticalInput));  // Controla el movimiento (caminar/correr)

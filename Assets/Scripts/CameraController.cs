@@ -29,7 +29,7 @@ public class CameraController : NetworkBehaviour
         }
 
         HandleCameraRotation();
-        UpdateCameraPosition();
+        UpdateCameraPositionRequestRpc();
     }
 
     void OnSpawn()
@@ -44,6 +44,7 @@ public class CameraController : NetworkBehaviour
         }
     }
 
+    //[Rpc(SendTo.Server)]
     private void HandleCameraRotation()
     {
         // Obtener la entrada del ratón para la rotación de la cámara
@@ -58,7 +59,8 @@ public class CameraController : NetworkBehaviour
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
     }
 
-    private void UpdateCameraPosition()
+    [Rpc(SendTo.Server)]
+    private void UpdateCameraPositionRequestRpc()
     {
         // Calcular la nueva dirección de la cámara
         Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
