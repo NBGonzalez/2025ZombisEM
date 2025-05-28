@@ -57,6 +57,8 @@ public class LevelBuilder : MonoBehaviour
     private HashSet<Vector3> humanSpawnPoints = new HashSet<Vector3>();
     private HashSet<Vector3> zombieSpawnPoints = new HashSet<Vector3>();
 
+    public int seed;
+
     #endregion
 
     #region Unity game loop methods
@@ -65,6 +67,8 @@ public class LevelBuilder : MonoBehaviour
     {
         GameObject parentObject = new GameObject("RoomsParent");
         roomParent = parentObject.transform;
+        seed = GameManager.Instance.GetNetworkSeed();
+        Random.InitState(seed);
     }
 
     #endregion
@@ -98,6 +102,9 @@ public class LevelBuilder : MonoBehaviour
                 if (i % 2 == 0 && j % 2 == 0)
                 {
                     humanSpawnPoints.Add(spawnPoint);
+                    humanSpawnPoints.Add(spawnPoint + new Vector3(roomWidth, 0, 0));
+                    humanSpawnPoints.Add(spawnPoint + new Vector3(0, 0, roomLength));
+                    humanSpawnPoints.Add(spawnPoint + new Vector3(roomWidth, 0, roomLength));
                 }
                 else
                 {
@@ -139,6 +146,7 @@ public class LevelBuilder : MonoBehaviour
             for (int z = 0; z < length; z++)
             {
                 int randomIndex = Random.Range(0, floorPrefabs.Length);
+
                 GameObject selectedFloorPrefab = floorPrefabs[randomIndex];
 
                 Vector3 tilePosition = new Vector3(x * tileSize + offsetX, 0, z * tileSize + offsetZ);

@@ -93,6 +93,20 @@ public class LevelManager : MonoBehaviour
 
         minutes = gameManager.GetTime(); // Asignar el tiempo de partida desde GameManager
 
+        // El GameManager tiene el numero de jugadores, saca cuentas para saber cuantos zombies y humanos spawnear despues.
+        int totalPlayers = gameManager.GetNumberOfPlayers();
+        numberOfHumans = totalPlayers;
+        //if(totalPlayers % 2 == 0)
+        //{
+        //    numberOfHumans = totalPlayers / 2;
+        //    numberOfZombies = totalPlayers / 2;
+        //}
+        //else
+        //{
+        //    numberOfHumans = totalPlayers / 2; // Humanos restantes
+        //    numberOfZombies = totalPlayers / 2 + 1; // Zombis restantes + 1 por ser impar
+        //}
+
         Debug.Log("Iniciando el nivel");
         // Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");
@@ -349,15 +363,13 @@ public class LevelManager : MonoBehaviour
             // Instancia el nuevo jugador y lo asigna al cliente
 
             GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
-            //GameObject player = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.gameObject;
-            //NetworkTransform playerTransform = player.GetComponent<NetworkTransform>();
             NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
-            playerNetworkObject.SpawnAsPlayerObject(clientId, true); // El 'true' permite que el dueño sea el cliente
+            playerNetworkObject.SpawnWithOwnership(clientId); // Asigna la propiedad al cliente
 
             player.tag = "Player";
 
             // Obtener la referencia a la cámara principal
-            Camera mainCamera = Camera.main;
+            Camera mainCamera = player.transform.GetChild(3).gameObject.GetComponent<Camera>();
 
             if (mainCamera != null)
             {
@@ -409,11 +421,13 @@ public class LevelManager : MonoBehaviour
         if (NetworkManager.Singleton.IsHost)
         {
             int spawnPoint = 0;
+
+            Debug.Log($"Número de jugadores conectados: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
             foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
                 SpawnPlayer(humanSpawnPoints[spawnPoint], playerPrefab, clientId);
 
-                Console.WriteLine("-------------------------------------TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
+                Console.WriteLine("TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
                 spawnPoint++;
             }
         }
@@ -425,7 +439,7 @@ public class LevelManager : MonoBehaviour
         {
             if (i < humanSpawnPoints.Count)
             {
-                SpawnNonPlayableCharacter(playerPrefab, humanSpawnPoints[i]);
+                //SpawnNonPlayableCharacter(playerPrefab, humanSpawnPoints[i]);
             }
         }
 
@@ -433,7 +447,7 @@ public class LevelManager : MonoBehaviour
         {
             if (i < zombieSpawnPoints.Count)
             {
-                SpawnNonPlayableCharacter(zombiePrefab, zombieSpawnPoints[i]);
+                //SpawnNonPlayableCharacter(zombiePrefab, zombieSpawnPoints[i]);
             }
         }
     }

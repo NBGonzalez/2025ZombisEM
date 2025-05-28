@@ -71,7 +71,8 @@ public class PlayerController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        networkName.OnValueChanged += NameChange;
+        //networkName.OnValueChanged += NameChange;
+        
     }
 
 

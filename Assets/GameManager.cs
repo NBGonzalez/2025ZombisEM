@@ -17,6 +17,8 @@ public class GameManager : NetworkBehaviour
     // Variable de red para sincronizar el modo de juego entre el servidor y los clientes
     NetworkVariable<FixedString64Bytes> networkGameMode = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
     NetworkVariable<int> networkTime = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
+    public NetworkVariable<int> numberOfPlayers = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
+    public NetworkVariable<int> networkSeed = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
 
     private void Awake()
     {
@@ -42,7 +44,9 @@ public class GameManager : NetworkBehaviour
         if (IsServer)
         {
             GetComponent<NetworkObject>().Spawn();
+            networkSeed.Value = UnityEngine.Random.Range(0, 10000); // Generar un seed aleatorio para el servidor
         }
+        
 
         maxPlayers = UIManager.maxConnections;
 
@@ -60,6 +64,7 @@ public class GameManager : NetworkBehaviour
     {
         var player = Instantiate(_playerPrefab);
         player.GetComponent<NetworkObject>().SpawnAsPlayerObject(obj);
+        numberOfPlayers.Value++;
     }
 
     private void OnServerStarted()
@@ -99,5 +104,14 @@ public class GameManager : NetworkBehaviour
         return networkTime.Value;
     }
     #endregion
+
+    public int GetNumberOfPlayers()
+    {
+        return numberOfPlayers.Value;
+    }
+    public int GetNetworkSeed()
+    {
+        return networkSeed.Value;
+    }
 
 }
