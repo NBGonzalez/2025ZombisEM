@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using System;
 using Unity.Collections;
 using System.Runtime.ConstrainedExecution;
+using UnityEngine.UIElements;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -91,14 +92,14 @@ public class PlayerController : NetworkBehaviour
         verticalInput = Input.GetAxis("Vertical");
 
         // Mover el jugador
-        MovePlayerRequestRpc(horizontalInput, verticalInput);
+        MovePlayer(horizontalInput, verticalInput);
 
         // Manejar las animaciones del jugador
-        HandleAnimations(horizontalInput, verticalInput);
+        HandleAnimationsRequestRpc(horizontalInput, verticalInput);
     }
 
-    [Rpc(SendTo.Everyone)]
-    void MovePlayerRequestRpc(float horizontalInput, float verticalInput)
+
+    void MovePlayer(float horizontalInput, float verticalInput)
     {
         //if(cameraTransform == null) { return; }
         //if (cameraTransform == null && IsOwner)
@@ -135,13 +136,22 @@ public class PlayerController : NetworkBehaviour
             // Ajustar la velocidad si es zombie
             float adjustedSpeed = isZombie ? moveSpeed * zombieSpeedModifier : moveSpeed;
 
-            // Mover al jugador en la dirección deseada
             transform.Translate(moveDirection * adjustedSpeed * Time.deltaTime, Space.World);
+            // Mover al jugador en la dirección deseada
+            MoverPersonajeRequestRpc(this.transform.position, this.transform.rotation);
         }
+
     }
 
-    //[Rpc(SendTo.ClientsAndHost)]
-    void HandleAnimations(float horizontalInput, float verticalInput)
+    [Rpc(SendTo.ClientsAndHost)]
+    void MoverPersonajeRequestRpc(Vector3 pjTransform, Quaternion pjRotation)
+    {
+        this.transform.position = pjTransform;
+        this.transform.rotation = pjRotation;
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    void HandleAnimationsRequestRpc(float horizontalInput, float verticalInput)
     {
         // Animaciones basadas en la dirección del movimiento
         animator.SetFloat("Speed", Mathf.Abs(horizontalInput) + Mathf.Abs(verticalInput));  // Controla el movimiento (caminar/correr)
