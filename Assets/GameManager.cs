@@ -115,5 +115,4 @@ public class GameManager : NetworkBehaviour
     {
         return networkSeed.Value;
     }
-
 }
