@@ -1966,7 +1966,10 @@ MonoBehaviour:
   numberOfZombies: 3
   gameMode: 1
   minutes: 1
+  humanSpawnPoints: []
+  zombieSpawnPoints: []
   gameOverPanel: {fileID: 861340988}
+  gameManager: {fileID: 0}
 --- !u!4 &1720106049
 Transform:
   m_ObjectHideFlags: 0
@@ -2041,6 +2044,7 @@ MonoBehaviour:
   roomLength: 9
   "\xEDtemsDensity": 20
   coinsDensity: 20
+  seed: 0
 --- !u!1 &1726941678
 GameObject:
   m_ObjectHideFlags: 0

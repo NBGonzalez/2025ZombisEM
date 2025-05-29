@@ -516,11 +516,13 @@ public class LevelManager : MonoBehaviour
     {
         if (isGameOver) return;
 
-        // Implementar la lógica para el modo de juego basado en monedas
-        if (gameModeText != null && playerController != null)
+        if (gameModeText != null)
         {
-            gameModeText.text = $"{playerController.CoinsCollected}/{CoinsGenerated}";
-            if (playerController.CoinsCollected == CoinsGenerated)
+            int collected = GameManager.Instance.TotalCoinsCollected.Value;
+            int total = GameManager.Instance.CoinsGenerated.Value;
+            gameModeText.text = $"{collected}/{total}";
+
+            if (collected >= total)
             {
                 isGameOver = true;
             }

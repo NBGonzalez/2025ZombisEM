@@ -29,9 +29,9 @@ public class PlayerController : NetworkBehaviour
     private float verticalInput;           // Entrada vertical (W/S o flechas)
 
     // Nombre del jugador
-    public NetworkVariable<FixedString64Bytes> networkName = new(writePerm: NetworkVariableWritePermission.Owner, 
+    public NetworkVariable<FixedString64Bytes> networkName = new(writePerm: NetworkVariableWritePermission.Owner,
                                                                  readPerm: NetworkVariableReadPermission.Everyone);
-        
+    int totalCollected = GameManager.Instance.TotalCoinsCollected.Value;
     public string name;
     public GameObject textName;
 
@@ -43,7 +43,7 @@ public class PlayerController : NetworkBehaviour
         //Esto es para el nombre
         //textName.GetComponent<TextMeshPro>().text = networkName.Value.ToString();
         networkName.OnValueChanged += NameChange;
-        
+
 
         if (!IsOwner)
         {
@@ -73,7 +73,7 @@ public class PlayerController : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         //networkName.OnValueChanged += NameChange;
-        
+
     }
 
 
@@ -110,7 +110,7 @@ public class PlayerController : NetworkBehaviour
 
         //    camara.AddComponent<Camera>();
         //    camara.AddComponent<CameraController>();
-            
+
         //    camara.GetComponent<CameraController>().player = this.transform;
         //    camara.GetComponent<CameraController>().offset = this.transform.position + new Vector3(0, 2, -5);
         //    cameraTransform = camara.transform;
@@ -161,8 +161,16 @@ public class PlayerController : NetworkBehaviour
     {
         if (!isZombie) // Solo los humanos pueden recoger monedas
         {
-            this.CoinsCollected++;
-            UpdateCoinUI();
+            if (IsOwner)
+            {
+                this.CoinsCollected++;
+                UpdateCoinUI();
+            }
+            if (IsServer)
+            {
+                GameManager.Instance.TotalCoinsCollected.Value++;
+
+            }
         }
     }
 
@@ -174,4 +182,3 @@ public class PlayerController : NetworkBehaviour
         }
     }
 }
-

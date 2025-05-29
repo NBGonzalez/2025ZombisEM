@@ -294,7 +294,7 @@ public class LevelBuilder : MonoBehaviour
             if (!isPositionOccupied) // Si no hay obstáculos, colocar la moneda
             {
                 PlaceElement(coinPrefab, tilePosition.x, tilePosition.z, Quaternion.identity);
-                CoinsGenerated++;
+                GameManager.Instance.CoinsGenerated.Value++;
             }
         }
     }
