@@ -31,7 +31,7 @@ public class PlayerController : NetworkBehaviour
     // Nombre del jugador
     public NetworkVariable<FixedString64Bytes> networkName = new(writePerm: NetworkVariableWritePermission.Owner,
                                                                  readPerm: NetworkVariableReadPermission.Everyone);
-    int totalCollected = GameManager.Instance.TotalCoinsCollected.Value;
+    int totalCollected;
     public string name;
     public GameObject textName;
 
@@ -39,6 +39,8 @@ public class PlayerController : NetworkBehaviour
     {
         // Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");
+
+        totalCollected = GameManager.Instance.TotalCoinsCollected.Value;
 
         //Esto es para el nombre
         //textName.GetComponent<TextMeshPro>().text = networkName.Value.ToString();
