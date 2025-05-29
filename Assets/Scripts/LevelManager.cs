@@ -210,10 +210,10 @@ public class LevelManager : MonoBehaviour
     private void ChangeToZombie()
     {
         GameObject currentPlayer = GameObject.FindGameObjectWithTag("Player");
-        ChangeToZombie(currentPlayer, true);
+        ChangeToZombieRequestRpc(currentPlayer, true);
     }
-
-    public void ChangeToZombie(GameObject human, bool enabled)
+    [ServerRpc]
+    public void ChangeToZombieRequestRpc(GameObject human, bool enabled)
     {
         Debug.Log("Cambiando a Zombie");
 
@@ -224,11 +224,17 @@ public class LevelManager : MonoBehaviour
             Quaternion playerRotation = human.transform.rotation;
             string uniqueID = human.GetComponent<PlayerController>().uniqueID;
 
+            ulong Id = human.GetComponent<NetworkObject>().OwnerClientId; // Obtener el ID del cliente propietario
+
             // Destruir el humano actual
-            Destroy(human);
+            human.GetComponent<NetworkObject>().Despawn(); // Despawn para redirigir a los clientes
+            //Destroy(human);
 
             // Instanciar el prefab del zombie en la misma posición y rotación
             GameObject zombie = Instantiate(zombiePrefab, playerPosition, playerRotation);
+            zombie.GetComponent<NetworkObject>().Spawn(); // Asegurarse de que el zombie se sincronice en red
+            zombie.GetComponent<NetworkObject>().ChangeOwnership(Id); // Cambiar la propiedad al cliente local
+
             if (enabled) { zombie.tag = "Player"; }
 
             // Obtener el componente PlayerController del zombie instanciado
