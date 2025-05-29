@@ -102,14 +102,16 @@ public class LevelBuilder : MonoBehaviour
                 Vector3 spawnPoint = new Vector3(x + roomWidth / 2, 2, z + roomLength / 2);
                 if (i % 2 == 0 && j % 2 == 0)
                 {
-                    humanSpawnPoints.Add(spawnPoint);
-                    humanSpawnPoints.Add(spawnPoint + new Vector3(roomWidth, 0, 0));
-                    humanSpawnPoints.Add(spawnPoint + new Vector3(0, 0, roomLength));
-                    humanSpawnPoints.Add(spawnPoint + new Vector3(roomWidth, 0, roomLength));
+                    humanSpawnPoints.Add(spawnPoint);// Abajo - Izquierda
+                    zombieSpawnPoints.Add(spawnPoint + new Vector3(spawnPoint.x * 2, 0, 0)); // Abajo - Derecha
+                    humanSpawnPoints.Add(spawnPoint + new Vector3(0, 0, spawnPoint.z * 2)); // Arriba - Izquierda
+                    zombieSpawnPoints.Add(spawnPoint + new Vector3(spawnPoint.x * 2, 0, spawnPoint.z * 2)); // Arriba - Derecha
                 }
                 else
                 {
-                    zombieSpawnPoints.Add(spawnPoint);
+
+
+
                 }
             }
         }

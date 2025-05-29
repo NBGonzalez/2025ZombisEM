@@ -52,6 +52,7 @@ public class LevelManager : MonoBehaviour
     private LevelBuilder levelBuilder;
 
     private PlayerController playerController;
+    public int totalPlayers;
 
     private float remainingSeconds;
     private bool isGameOver = false;
@@ -94,18 +95,17 @@ public class LevelManager : MonoBehaviour
         minutes = gameManager.GetTime(); // Asignar el tiempo de partida desde GameManager
 
         // El GameManager tiene el numero de jugadores, saca cuentas para saber cuantos zombies y humanos spawnear despues.
-        int totalPlayers = gameManager.GetNumberOfPlayers();
-        numberOfHumans = totalPlayers;
-        //if(totalPlayers % 2 == 0)
-        //{
-        //    numberOfHumans = totalPlayers / 2;
-        //    numberOfZombies = totalPlayers / 2;
-        //}
-        //else
-        //{
-        //    numberOfHumans = totalPlayers / 2; // Humanos restantes
-        //    numberOfZombies = totalPlayers / 2 + 1; // Zombis restantes + 1 por ser impar
-        //}
+        totalPlayers = gameManager.GetNumberOfPlayers();
+        if(totalPlayers % 2 == 0)
+        {
+            numberOfHumans = totalPlayers / 2;
+            numberOfZombies = totalPlayers / 2;
+        }
+        else
+        {
+            numberOfHumans = totalPlayers / 2; // Humanos restantes
+            numberOfZombies = totalPlayers / 2 + 1; // Zombis restantes + 1 por ser impar
+        }
 
         Debug.Log("Iniciando el nivel");
         // Buscar el objeto "CanvasPlayer" en la escena
@@ -420,15 +420,24 @@ public class LevelManager : MonoBehaviour
         //Me hace un spawn por clientID
         if (NetworkManager.Singleton.IsHost)
         {
-            int spawnPoint = 0;
+            int spawnPointHuman = 0;
+            int spawnPointZombie = 0;
 
             Debug.Log($"Número de jugadores conectados: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
             foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
-                SpawnPlayer(humanSpawnPoints[spawnPoint], playerPrefab, clientId);
-
-                Console.WriteLine("TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
-                spawnPoint++;
+                if(spawnPointHuman < spawnPointZombie)
+                {
+                    SpawnPlayer(humanSpawnPoints[spawnPointHuman], playerPrefab, clientId);
+                    spawnPointHuman++;
+                }
+                else
+                {
+                    SpawnPlayer(zombieSpawnPoints[spawnPointZombie], zombiePrefab, clientId);
+                    spawnPointZombie++;
+                }
+                //Console.WriteLine("TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
+                
             }
         }
 
