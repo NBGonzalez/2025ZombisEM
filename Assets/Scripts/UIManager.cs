@@ -66,7 +66,7 @@ public class UIManager : MonoBehaviour
 
     }
 
-    
+
     // Primero salen los paneles de Relay.
     public async void StartHost()
     {
@@ -122,12 +122,12 @@ public class UIManager : MonoBehaviour
             "Host" : NetworkManager.Singleton.IsServer ? "Server" : "Client";
 
         //STATUSPANEL.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Transport: " +
-            //NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetType().Name;
+        //NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetType().Name;
         STATUSPANEL.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Mode: " + mode;
         STATUSPANEL.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = "Room: " + joinCode;
     }
 
-    
+
     // Si eres Host, muestra el panel de Gamemode.
     public void CoinGameModeSelected()
     {
@@ -168,6 +168,7 @@ public class UIManager : MonoBehaviour
             if (player.GetComponent<NetworkObject>().IsOwner)
             {
                 player.GetComponent<PlayerController>().networkName.Value = name;
+                GameManager.Instance.SetPlayerName(name, player.GetComponent<NetworkObject>().OwnerClientId);
             }
             else
             {

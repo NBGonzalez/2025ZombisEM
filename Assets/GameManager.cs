@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Netcode;
@@ -9,7 +10,7 @@ public class GameManager : NetworkBehaviour
 {
     NetworkManager _networkManager;
     GameObject _playerPrefab;
-    
+
     int maxPlayers;
     int playerId;
     public static GameManager Instance { get; private set; }
@@ -21,6 +22,9 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<int> networkSeed = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
     public NetworkVariable<int> CoinsGenerated = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
     public NetworkVariable<int> TotalCoinsCollected = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
+
+    ConcurrentDictionary<ulong, string> networkPlayerNames = new ConcurrentDictionary<ulong, string>();
+
 
     private void Awake()
     {
@@ -37,7 +41,7 @@ public class GameManager : NetworkBehaviour
         networkGameMode.OnValueChanged += (oldValue, newValue) => { Debug.Log($"Sincronizado en cliente: {newValue}"); };
         networkTime.OnValueChanged += (oldValue, newValue) => { Debug.Log($"Tiempo sincronizado en cliente: {newValue}"); };
 
-        }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -48,7 +52,7 @@ public class GameManager : NetworkBehaviour
             GetComponent<NetworkObject>().Spawn();
             networkSeed.Value = UnityEngine.Random.Range(0, 10000); // Generar un seed aleatorio para el servidor
         }
-        
+
 
         maxPlayers = UIManager.maxConnections;
 
@@ -114,5 +118,26 @@ public class GameManager : NetworkBehaviour
     public int GetNetworkSeed()
     {
         return networkSeed.Value;
+    }
+
+    public void SetPlayerName(string name, ulong clientId)
+    {
+
+        //networkPlayerNames[clientId] = name;
+        networkPlayerNames.TryAdd(clientId, name); // Aseguramos que el nombre se añade al diccionario
+        Debug.Log($"Nombre del jugador {name} establecido: {clientId}");
+
+    }
+    public string GetPlayerName(ulong clientId)
+    {
+        if (networkPlayerNames.TryGetValue(clientId, out string name))
+        {
+            return name;
+        }
+        else
+        {
+            return "Jugador Desconocido"; // Valor por defecto si no se encuentra el nombre
+        }
+
     }
 }

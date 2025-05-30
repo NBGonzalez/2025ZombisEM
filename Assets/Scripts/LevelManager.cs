@@ -371,6 +371,7 @@ public class LevelManager : MonoBehaviour
             GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
             NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
             playerNetworkObject.SpawnWithOwnership(clientId); // Asigna la propiedad al cliente
+            player.GetComponent<PlayerController>().OnNetworkSpawn();
 
             player.tag = "Player";
 

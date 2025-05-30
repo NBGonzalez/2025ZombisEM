@@ -74,9 +74,18 @@ public class PlayerController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        //networkName.OnValueChanged += NameChange;
 
+        if (IsOwner)
+        {
+            string savedName = GameManager.Instance.GetPlayerName(NetworkManager.Singleton.LocalClientId);
+            networkName.Value = savedName;
+        }
+
+        networkName.OnValueChanged += NameChange;
+        NameChange(default, networkName.Value);
     }
+
+
 
 
     public void NameChange(FixedString64Bytes previousValue, FixedString64Bytes newValue)
