@@ -225,6 +225,7 @@ public class LevelManager : MonoBehaviour
             string uniqueID = human.GetComponent<PlayerController>().uniqueID;
 
             ulong Id = human.GetComponent<NetworkObject>().OwnerClientId; // Obtener el ID del cliente propietario
+            string playerName = human.GetComponent<PlayerController>().networkName.Value.ToString();
 
             // Destruir el humano actual
             human.GetComponent<NetworkObject>().Despawn(); // Despawn para redirigir a los clientes
@@ -234,6 +235,8 @@ public class LevelManager : MonoBehaviour
             GameObject zombie = Instantiate(zombiePrefab, playerPosition, playerRotation);
             zombie.GetComponent<NetworkObject>().Spawn(); // Asegurarse de que el zombie se sincronice en red
             zombie.GetComponent<NetworkObject>().ChangeOwnership(Id); // Cambiar la propiedad al cliente local
+            zombie.GetComponent<PlayerController>().networkName.Value = playerName; // Asignar el nombre del jugador
+            zombie.GetComponent<PlayerController>().NameChange(default, playerName);
 
             if (enabled) { zombie.tag = "Player"; }
 
@@ -367,11 +370,12 @@ public class LevelManager : MonoBehaviour
             }
 
             // Instancia el nuevo jugador y lo asigna al cliente
-
             GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
             NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
             playerNetworkObject.SpawnWithOwnership(clientId); // Asigna la propiedad al cliente
+            
             player.GetComponent<PlayerController>().OnNetworkSpawn();
+            //player.GetComponent<PlayerController>().networkName.Value = playerName; // Asigna el nombre del jugador
 
             player.tag = "Player";
 
