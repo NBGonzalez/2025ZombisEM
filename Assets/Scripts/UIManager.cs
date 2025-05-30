@@ -10,8 +10,9 @@ using Unity.Services.Relay;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
 using UnityEditor;
+using System.Runtime.CompilerServices;
 
-public class UIManager : MonoBehaviour
+public class UIManager : NetworkBehaviour
 {
     public TMP_InputField inputName;
     public TMP_InputField inputJoinCode;
@@ -23,19 +24,34 @@ public class UIManager : MonoBehaviour
 
     public GameManager gameManager;
 
-    //Paneles:
+    private NetworkVariable<int> networkReadyPlayers = new NetworkVariable<int>(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+
+    // Paneles:
     public GameObject relayPanel;
     public GameObject gamemodePanel;
     public GameObject timeSelectionPanel;
     public GameObject namePanel;
+    public GameObject readyPanel;
     public GameObject finalPanel;
     public GameObject STATUSPANEL;
     public GameObject titlePanel;
+
+    public TextMeshProUGUI readyPlayersText;
+
+    // Botones:
+    public GameObject readyButton;
+    public GameObject notReadyButton;
 
     public static bool hasNetworkConnection = false;
 
     public void Awake()
     {
+
+        readyPlayersText = GameObject.Find("ReadyPlayersText").GetComponent<TextMeshProUGUI>();
+
+
         //Si ya tenemos conexión de red, saltamos directo a la selección de modo
         if (hasNetworkConnection && NetworkManager.Singleton != null &&
             (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsClient))
@@ -64,6 +80,26 @@ public class UIManager : MonoBehaviour
             hasNetworkConnection = false;
         }
 
+    }
+
+    private void OnEnable()
+    {
+        networkReadyPlayers.OnValueChanged += OnReadyPlayersChanged;
+    }
+
+    private void OnDisable()
+    {
+        networkReadyPlayers.OnValueChanged -= OnReadyPlayersChanged;
+    }
+
+    private void OnReadyPlayersChanged(int previousValue, int newValue)
+    {
+        readyPlayersText.text = "Jugadores listos: " + newValue + "/" + GameManager.Instance.GetNumberOfPlayers();
+
+        if (NetworkManager.Singleton.IsHost && newValue >= GameManager.Instance.GetNumberOfPlayers())
+        {
+            StartGame();
+        }
     }
 
 
@@ -177,7 +213,46 @@ public class UIManager : MonoBehaviour
 
         }
         Debug.Log(name);
-        finalPanel.SetActive(true);
+        readyPanel.SetActive(true);
+    }
+
+    public void ReadyPanel()
+    {
+        //readyPanel.SetActive(true);
+        readyButton.SetActive(true);
+        notReadyButton.SetActive(false);
+        NotPlayerReadyServerRpc();
+        readyPlayersText.text = "Jugadores listos: " + networkReadyPlayers.Value + "/" + GameManager.Instance.GetNumberOfPlayers();
+
+    }
+    public void NotReadyPanel()
+    {
+
+        notReadyButton.SetActive(true);
+        readyButton.SetActive(false);
+        PlayerReadyServerRpc();
+        readyPlayersText.text = "Jugadores listos: " + networkReadyPlayers.Value + "/" + GameManager.Instance.GetNumberOfPlayers();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void PlayerReadyServerRpc()
+    {
+        // Incrementar el contador de jugadores listos
+        networkReadyPlayers.Value++;
+        Debug.Log("Jugadores listos: " + networkReadyPlayers.Value);
+
+        // Verificar si todos los jugadores están listos
+        if (networkReadyPlayers.Value >= GameManager.Instance.GetNumberOfPlayers())
+        {
+            StartGame();
+        }
+    }
+    [ServerRpc(RequireOwnership = false)]
+    public void NotPlayerReadyServerRpc()
+    {
+        
+        networkReadyPlayers.Value--;
+        Debug.Log("NotPlayerReadyServerRpc called. Current ready players: " + networkReadyPlayers.Value);
     }
 
     // Cuando todos los jugadores han puesto su nombre, se inicia el juego.
