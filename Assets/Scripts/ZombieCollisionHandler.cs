@@ -16,7 +16,7 @@ public class ZombieCollisionHandler : MonoBehaviour
             if (levelManager != null && collision.gameObject.name.Contains(levelManager.PlayerPrefabName))
             {
                 // Cambiar el humano a zombie
-                levelManager.ChangeToZombieRequestRpc(collision.gameObject, playerController.enabled);
+                levelManager.ChangeToZombie(collision.gameObject, playerController.enabled);
             }
         }
     }

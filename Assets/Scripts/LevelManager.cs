@@ -13,7 +13,7 @@ public enum GameMode
     Monedas
 }
 
-public class LevelManager : MonoBehaviour
+public class LevelManager : NetworkBehaviour
 {
     #region Properties
 
@@ -210,10 +210,10 @@ public class LevelManager : MonoBehaviour
     private void ChangeToZombie()
     {
         GameObject currentPlayer = GameObject.FindGameObjectWithTag("Player");
-        ChangeToZombieRequestRpc(currentPlayer, true);
+        ChangeToZombie(currentPlayer, true);
     }
-    [ServerRpc]
-    public void ChangeToZombieRequestRpc(GameObject human, bool enabled)
+    
+    public void ChangeToZombie(GameObject human, bool enabled)
     {
         Debug.Log("Cambiando a Zombie");
 
@@ -249,7 +249,12 @@ public class LevelManager : MonoBehaviour
                 playerController.uniqueID = uniqueID; // Mantener el identificador único
                 numberOfHumans--; // Reducir el número de humanos
                 numberOfZombies++; // Aumentar el número de zombis
+
+                Debug.Log("ME VOY A METER EN EL RPC DE LOS COJONES!!!!!!!!!!!!!");
+                UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
+                Debug.Log("ME VOY A METER AL PUTO UPDATE DE LA UI!!!!!!!!!");
                 UpdateTeamUI();
+                Debug.Log("HE SALIDOOOOOOOOOOOOOOOOO");
 
                 if (enabled)
                 {
@@ -331,6 +336,8 @@ public class LevelManager : MonoBehaviour
                     playerController.isZombie = false; // Cambiar el estado a humano
                     numberOfHumans++; // Aumentar el número de humanos
                     numberOfZombies--; // Reducir el número de zombis
+                    UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
+                    UpdateTeamUI();
                 }
                 else
                 {
@@ -488,6 +495,12 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    [ClientRpc]
+    void UpdateHumansZombiesClientRpc(int humans, int zombies)
+    {
+        this.numberOfHumans = humans;
+        this.numberOfZombies = zombies;
+    }
     private void UpdateTeamUI()
     {
         if (humansText != null)
