@@ -61,7 +61,7 @@ public class PlayerController : NetworkBehaviour
 
         if (canvas != null)
         {
-            Debug.Log("Canvas encontrado");
+            //Debug.Log("Canvas encontrado");
 
             // Buscar el Panel dentro del CanvasHud
             Transform panel = canvas.transform.Find("PanelHud");
@@ -86,6 +86,7 @@ public class PlayerController : NetworkBehaviour
         name = GameManager.Instance.GetPlayerName(this.GetComponent<NetworkObject>().OwnerClientId); // Obtener el nombre del jugador desde el GameManager
         networkName.Value = name; // Asignar el nombre al NetworkVariable
         this.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = name;
+        Debug.Log("Estoy en OnNetworkSpawn, mi nombre es: " + name + " y mi ID " + this.GetComponent<NetworkObject>().OwnerClientId);
         
     }
 
@@ -95,6 +96,7 @@ public class PlayerController : NetworkBehaviour
     public void NameChange(FixedString64Bytes previousValue, FixedString64Bytes newValue)
     {
         name = newValue.ToString();
+        networkName.Value = name;
         this.gameObject.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = newValue.ToString();
     }
 

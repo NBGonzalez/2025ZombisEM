@@ -132,7 +132,7 @@ public class GameManager : NetworkBehaviour
         {
             this.networkPlayerNames[clientId] = name; // Actualizamos el nombre si ya existe
         }
-        Debug.Log($"Nombre del jugador {name} establecido en cliente: {clientId}");
+        //Debug.Log($"Nombre del jugador {name} establecido en cliente: {clientId}");
         SetPlayerNameClientRpc(clientId, name);
     }
 
@@ -148,7 +148,7 @@ public class GameManager : NetworkBehaviour
             this.networkPlayerNames[clientId] = playerName; // Actualizamos el nombre si ya existe
         }
 
-        Debug.Log($"Nombre sincronizado en cliente {NetworkManager.Singleton.LocalClientId}: {clientId} -> {playerName}");
+        //Debug.Log($"Nombre sincronizado en cliente {NetworkManager.Singleton.LocalClientId}: {clientId} -> {playerName}");
     }
 
     public void SetPlayerName(string name, ulong clientId)
@@ -156,7 +156,7 @@ public class GameManager : NetworkBehaviour
 
         //networkPlayerNames[clientId] = name;
         networkPlayerNames.TryAdd(clientId, name); // Aseguramos que el nombre se añade al diccionario
-        Debug.Log($"Nombre del jugador {name} establecido: {clientId}");
+        //Debug.Log($"Nombre del jugador {name} establecido: {clientId}");
 
     }
     public string GetPlayerName(ulong clientId)

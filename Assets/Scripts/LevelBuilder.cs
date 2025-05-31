@@ -130,13 +130,13 @@ public class LevelBuilder : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Creando habitación en ({offsetX}, {offsetZ}) con dimensiones {width}x{length}...");
+        //Debug.Log($"Creando habitación en ({offsetX}, {offsetZ}) con dimensiones {width}x{length}...");
         CreateFloor(width, length, offsetX, offsetZ);
-        Debug.Log($"Habitación generada en ({offsetX}, {offsetZ}).");
+        //Debug.Log($"Habitación generada en ({offsetX}, {offsetZ}).");
 
-        Debug.Log($"Creando paredes en ({offsetX}, {offsetZ}) con dimensiones {width}x{length}...");
+        //Debug.Log($"Creando paredes en ({offsetX}, {offsetZ}) con dimensiones {width}x{length}...");
         CreateWalls(width, length, offsetX, offsetZ);
-        Debug.Log($"Paredes generadas en ({offsetX}, {offsetZ}).");
+        //Debug.Log($"Paredes generadas en ({offsetX}, {offsetZ}).");
     }
 
     /// <summary>
@@ -165,7 +165,7 @@ public class LevelBuilder : MonoBehaviour
             }
         }
 
-        Debug.Log($"Suelo generado con dimensiones {width}x{length} usando {floorPrefabs.Length} prefabs diferentes.");
+        //Debug.Log($"Suelo generado con dimensiones {width}x{length} usando {floorPrefabs.Length} prefabs diferentes.");
     }
 
     /// <summary>

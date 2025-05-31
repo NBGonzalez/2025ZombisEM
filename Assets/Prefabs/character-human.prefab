@@ -638,6 +638,8 @@ MonoBehaviour:
         byte0061: 0
   name: 
   textName: {fileID: 5048983991049466369}
+  convertido:
+    m_InternalValue: 0
 --- !u!114 &5703868434136537400
 MonoBehaviour:
   m_ObjectHideFlags: 0

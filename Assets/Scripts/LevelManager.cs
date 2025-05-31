@@ -112,12 +112,12 @@ public class LevelManager : NetworkBehaviour
             numberOfZombies = totalPlayers / 2 + 1; // Zombis restantes + 1 por ser impar
         }
 
-        Debug.Log("Iniciando el nivel");
+        //Debug.Log("Iniciando el nivel");
         // Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");
         if (canvas != null)
         {
-            Debug.Log("Canvas encontrado");
+            //Debug.Log("Canvas encontrado");
 
             // Buscar el Panel dentro del CanvasHud
             Transform panel = canvas.transform.Find("PanelHud");
@@ -249,7 +249,7 @@ public class LevelManager : NetworkBehaviour
             string uniqueID = human.GetComponent<PlayerController>().uniqueID;
 
             ulong Id = human.GetComponent<NetworkObject>().OwnerClientId; // Obtener el ID del cliente propietario
-            string playerName = human.GetComponent<PlayerController>().networkName.Value.ToString();
+            string playerName = GameManager.Instance.GetPlayerName(Id); // Obtener el nombre del jugador desde GameManager
 
             // Destruir el humano actual
             human.GetComponent<NetworkObject>().Despawn(); // Despawn para redirigir a los clientes
@@ -257,10 +257,14 @@ public class LevelManager : NetworkBehaviour
 
             // Instanciar el prefab del zombie en la misma posición y rotación
             GameObject zombie = Instantiate(zombiePrefab, playerPosition, playerRotation);
-            zombie.GetComponent<NetworkObject>().Spawn(); // Asegurarse de que el zombie se sincronice en red
-            zombie.GetComponent<NetworkObject>().ChangeOwnership(Id); // Cambiar la propiedad al cliente local
-            zombie.GetComponent<PlayerController>().networkName.Value = playerName; // Asignar el nombre del jugador
-            zombie.GetComponent<PlayerController>().NameChange(default, playerName);
+            //zombie.GetComponent<NetworkObject>().Spawn(); // Asegurarse de que el zombie se sincronice en red
+            zombie.GetComponent<NetworkObject>().SpawnAsPlayerObject(Id); // Asignar la propiedad al cliente propietario
+            //zombie.GetComponent<NetworkObject>().ChangeOwnership(Id); // Cambiar la propiedad al cliente local
+            //zombie.GetComponent<PlayerController>().networkName.Value = playerName; // Asignar el nombre del jugador
+            //zombie.GetComponent<PlayerController>().NameChange(default, playerName);
+            zombie.GetComponent<PlayerController>().OnNetworkSpawn(); // Asegurarse de que el PlayerController se inicialice correctamente
+            zombie.GetComponent<PlayerController>().name = playerName; // Asignar el nombre del jugador
+            //zombie.GetComponent<PlayerController>().NameChange(default, playerName); // Asignar el nombre del jugador
 
             if (enabled) { zombie.tag = "Player"; }
 
@@ -282,11 +286,11 @@ public class LevelManager : NetworkBehaviour
 
 
 
-                Debug.Log("ME VOY A METER EN EL RPC DE LOS COJONES!!!!!!!!!!!!!");
+                //Debug.Log("ME VOY A METER EN EL RPC DE LOS COJONES!!!!!!!!!!!!!");
                 UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
-                Debug.Log("ME VOY A METER AL PUTO UPDATE DE LA UI!!!!!!!!!");
+                //Debug.Log("ME VOY A METER AL PUTO UPDATE DE LA UI!!!!!!!!!");
                 UpdateTeamUI();
-                Debug.Log("HE SALIDOOOOOOOOOOOOOOOOO");
+                //Debug.Log("HE SALIDOOOOOOOOOOOOOOOOO");
 
                 if (enabled)
                 {
@@ -393,7 +397,7 @@ public class LevelManager : NetworkBehaviour
         //////////////////////////////// INTENTO DE SPAWN DE JUGADORES /////////////////////////
 
 
-        Debug.Log($"Instanciando jugador en {spawnPosition}");
+        //Debug.Log($"Instanciando jugador en {spawnPosition}");
         if (prefab != null)
         {
             Debug.Log($"Instanciando jugador en {spawnPosition}");
@@ -428,18 +432,18 @@ public class LevelManager : NetworkBehaviour
 
                 if (cameraController != null)
                 {
-                    Debug.Log($"CameraController encontrado en la cámara principal.");
+                    //Debug.Log($"CameraController encontrado en la cámara principal.");
                     // Asignar el jugador al script CameraController
                     cameraController.player = player.transform;
                 }
 
-                Debug.Log($"Cámara principal encontrada en {mainCamera}");
+                //Debug.Log($"Cámara principal encontrada en {mainCamera}");
                 // Obtener el componente PlayerController del jugador instanciado
                 playerController = player.GetComponent<PlayerController>();
                 // Asignar el transform de la cámara al PlayerController
                 if (playerController != null)
                 {
-                    Debug.Log($"PlayerController encontrado en el jugador instanciado.");
+                    //Debug.Log($"PlayerController encontrado en el jugador instanciado.");
                     playerController.enabled = true;
                     playerController.cameraTransform = mainCamera.transform;
                     playerController.uniqueID = uniqueIdGenerator.GenerateUniqueID(); // Generar un identificador único
@@ -464,7 +468,7 @@ public class LevelManager : NetworkBehaviour
 
     private void SpawnTeams()
     {
-        Debug.Log("Instanciando equipos");
+        //Debug.Log("Instanciando equipos");
         if (humanSpawnPoints.Count <= 0) { return; }
 
         //Me hace un spawn por clientID
@@ -473,7 +477,7 @@ public class LevelManager : NetworkBehaviour
             int spawnPointHuman = 0;
             int spawnPointZombie = 0;
 
-            Debug.Log($"Número de jugadores conectados: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
+            //Debug.Log($"Número de jugadores conectados: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
             foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
                 if (spawnPointHuman < spawnPointZombie)
@@ -492,7 +496,7 @@ public class LevelManager : NetworkBehaviour
         }
 
 
-        Debug.Log($"Personaje jugable instanciado en {humanSpawnPoints[0]}");
+        //Debug.Log($"Personaje jugable instanciado en {humanSpawnPoints[0]}");
 
         for (int i = 1; i < numberOfHumans; i++)
         {
