@@ -68,9 +68,13 @@ public class GameManager : NetworkBehaviour
 
     private void OnClientConnected(ulong obj) // Solo se ejecuta en el jugador
     {
-        var player = Instantiate(_playerPrefab);
-        player.GetComponent<NetworkObject>().SpawnAsPlayerObject(obj);
-        numberOfPlayers.Value++;
+        if (IsServer)
+        {
+            var player = Instantiate(_playerPrefab);
+            player.GetComponent<NetworkObject>().SpawnAsPlayerObject(obj);
+            numberOfPlayers.Value++;
+        }
+
     }
 
     private void OnServerStarted()
