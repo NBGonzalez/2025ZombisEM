@@ -83,10 +83,7 @@ public class GameManager : NetworkBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
 
-    }
 
     #region GAMEMODE
     public string CurrentGameMode
@@ -158,7 +155,6 @@ public class GameManager : NetworkBehaviour
     public void SetPlayerName(string name, ulong clientId)
     {
 
-        //networkPlayerNames[clientId] = name;
         networkPlayerNames.TryAdd(clientId, name); // Aseguramos que el nombre se añade al diccionario
         //Debug.Log($"Nombre del jugador {name} establecido: {clientId}");
 

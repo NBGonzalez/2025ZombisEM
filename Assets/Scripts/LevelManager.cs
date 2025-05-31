@@ -170,7 +170,7 @@ public class LevelManager : NetworkBehaviour
             }
         }
 
-        remainingSeconds = minutes * 5;
+        remainingSeconds = minutes * 60;
 
         // Obtener los puntos de aparición y el número de monedas generadas desde LevelBuilder
         if (levelBuilder != null)
@@ -263,14 +263,12 @@ public class LevelManager : NetworkBehaviour
 
             // Instanciar el prefab del zombie en la misma posición y rotación
             GameObject zombie = Instantiate(zombiePrefab, playerPosition, playerRotation);
-            //zombie.GetComponent<NetworkObject>().Spawn(); // Asegurarse de que el zombie se sincronice en red
+
             zombie.GetComponent<NetworkObject>().SpawnAsPlayerObject(Id); // Asignar la propiedad al cliente propietario
-            //zombie.GetComponent<NetworkObject>().ChangeOwnership(Id); // Cambiar la propiedad al cliente local
-            //zombie.GetComponent<PlayerController>().networkName.Value = playerName; // Asignar el nombre del jugador
-            //zombie.GetComponent<PlayerController>().NameChange(default, playerName);
+
             zombie.GetComponent<PlayerController>().OnNetworkSpawn(); // Asegurarse de que el PlayerController se inicialice correctamente
             zombie.GetComponent<PlayerController>().name = playerName; // Asignar el nombre del jugador
-            //zombie.GetComponent<PlayerController>().NameChange(default, playerName); // Asignar el nombre del jugador
+
 
             if (enabled) { zombie.tag = "Player"; }
 
@@ -290,13 +288,8 @@ public class LevelManager : NetworkBehaviour
                     VictoriaZombiesRequestRpc(Id);
                 }
 
-
-
-                //Debug.Log("ME VOY A METER EN EL RPC DE LOS COJONES!!!!!!!!!!!!!");
                 UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
-                //Debug.Log("ME VOY A METER AL PUTO UPDATE DE LA UI!!!!!!!!!");
                 UpdateTeamUI();
-                //Debug.Log("HE SALIDOOOOOOOOOOOOOOOOO");
 
                 if (enabled)
                 {
@@ -478,29 +471,6 @@ public class LevelManager : NetworkBehaviour
         //Debug.Log("Instanciando equipos");
         if (humanSpawnPoints.Count <= 0) { return; }
 
-        //Me hace un spawn por clientID
-        //if (NetworkManager.Singleton.IsHost)
-        //{
-        //    int spawnPointHuman = 0;
-        //    int spawnPointZombie = 0;
-
-        //    //Debug.Log($"Número de jugadores conectados: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
-        //    foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
-        //    {
-        //        if (spawnPointHuman < spawnPointZombie)
-        //        {
-        //            SpawnPlayer(humanSpawnPoints[spawnPointHuman], playerPrefab, clientId);
-        //            spawnPointHuman++;
-        //        }
-        //        else
-        //        {
-        //            SpawnPlayer(zombieSpawnPoints[spawnPointZombie], zombiePrefab, clientId);
-        //            spawnPointZombie++;
-        //        }
-        //        //Console.WriteLine("TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
-        //    }
-        //}
-
         int nJugadores = NetworkManager.Singleton.ConnectedClientsIds.Count;
         List<ulong> jugadores = NetworkManager.Singleton.ConnectedClientsIds.ToList();
 
@@ -608,7 +578,7 @@ public class LevelManager : NetworkBehaviour
             //isGameOver = true;
             var allPlayers = GameObject.FindGameObjectsWithTag("Player");
             
-            if (allPlayers.Count() != GameManager.Instance.maxPlayers)
+            if (allPlayers.Count() == GameManager.Instance.maxPlayers)
             {
                 remainingSeconds = 0;
                 VictoriaHumanosRequestRpc();
@@ -640,7 +610,7 @@ public class LevelManager : NetworkBehaviour
             if (collected >= total)
             {
                 var allPlayers = GameObject.FindGameObjectsWithTag("Player");
-                if(allPlayers.Count() != GameManager.Instance.maxPlayers)
+                if(allPlayers.Count() == GameManager.Instance.maxPlayers)
                 {
                     VictoriaHumanosRequestRpc();
                 }
@@ -737,7 +707,3 @@ public class LevelManager : NetworkBehaviour
     }
 
 }
-
-
-
-

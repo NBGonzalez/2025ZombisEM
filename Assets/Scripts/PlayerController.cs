@@ -37,7 +37,6 @@ public class PlayerController : NetworkBehaviour
     public GameObject textName;
 
     public NetworkVariable<bool> convertido = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
-    //public bool convertido = false; // Para saber si el jugador ha sido convertido en zombie a mitad de la partida
 
     public Dictionary<ulong, string> allNetworkNames = new Dictionary<ulong, string>();
 
@@ -50,7 +49,6 @@ public class PlayerController : NetworkBehaviour
         totalCollected = GameManager.Instance.TotalCoinsCollected.Value;
 
         //Esto es para el nombre
-        //textName.GetComponent<TextMeshPro>().text = networkName.Value.ToString();
         networkName.OnValueChanged += NameChange;
 
 
@@ -81,8 +79,7 @@ public class PlayerController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        //Debug.Log("Mi nombre es: ------------------ " + GameManager.Instance.networkPlayerNames[this.GetComponent<NetworkObject>().OwnerClientId]);
-        //name = GameManager.Instance.networkPlayerNames[this.GetComponent<NetworkObject>().OwnerClientId];
+
         name = GameManager.Instance.GetPlayerName(this.GetComponent<NetworkObject>().OwnerClientId); // Obtener el nombre del jugador desde el GameManager
         networkName.Value = name; // Asignar el nombre al NetworkVariable
         this.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = name;
@@ -118,25 +115,6 @@ public class PlayerController : NetworkBehaviour
 
     void MovePlayer(float horizontalInput, float verticalInput)
     {
-        //if(cameraTransform == null) { return; }
-        //if (cameraTransform == null && IsOwner)
-        //{
-        //    GameObject camara = new GameObject();
-
-        //    Console.WriteLine("Camara creada");
-
-        //    camara.AddComponent<Camera>();
-        //    camara.AddComponent<CameraController>();
-
-        //    camara.GetComponent<CameraController>().player = this.transform;
-        //    camara.GetComponent<CameraController>().offset = this.transform.position + new Vector3(0, 2, -5);
-        //    cameraTransform = camara.transform;
-
-        //    if (!IsOwner)
-        //    {
-        //        camara.SetActive(false);
-        //    }
-        //}
 
 
         // Calcular la dirección de movimiento en relación a la cámara

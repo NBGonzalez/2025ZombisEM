@@ -52,6 +52,10 @@ public class UIManager : NetworkBehaviour
 
     public void Awake()
     {
+        // Desconexiones:
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+
+
 
         readyPlayersText = GameObject.Find("ReadyPlayersText").GetComponent<TextMeshProUGUI>();
         gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
@@ -113,13 +117,16 @@ public class UIManager : NetworkBehaviour
     private void OnDisable()
     {
         networkReadyPlayers.OnValueChanged -= OnReadyPlayersChanged;
+        NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+
     }
 
     private void OnReadyPlayersChanged(int previousValue, int newValue)
     {
-        readyPlayersText.text = "Jugadores listos: " + newValue + "/" + GameManager.Instance.GetNumberOfPlayers();
+        readyPlayersText.text = "Jugadores listos: " + newValue + "/" + NetworkManager.Singleton.ConnectedClients.Count;
 
-        if (NetworkManager.Singleton.IsHost && newValue >= GameManager.Instance.GetNumberOfPlayers())
+
+        if (NetworkManager.Singleton.IsHost && newValue >= NetworkManager.Singleton.ConnectedClients.Count)
         {
             StartGame();
         }
@@ -154,7 +161,7 @@ public class UIManager : NetworkBehaviour
         }
 
         Debug.Log("Attempting to join with code: " + joinCode);
-        //joinCode = inputJoinCode.text;
+
         var allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
         NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(allocation, "dtls"));
         NetworkManager.Singleton.StartClient();
@@ -180,8 +187,6 @@ public class UIManager : NetworkBehaviour
         var mode = NetworkManager.Singleton.IsHost ?
             "Host" : NetworkManager.Singleton.IsServer ? "Server" : "Client";
 
-        //STATUSPANEL.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Transport: " +
-        //NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetType().Name;
         STATUSPANEL.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Mode: " + mode;
         STATUSPANEL.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = "Room: " + joinCode;
     }
@@ -191,7 +196,7 @@ public class UIManager : NetworkBehaviour
     public void CoinGameModeSelected()
     {
         gameModeSelected = "CoinGame";
-        //gameManager.SetGameMode(gameModeSelected);
+
         gameManager.CurrentGameMode = gameModeSelected;
         gamemodePanel.SetActive(false);
         namePanel.SetActive(true);
@@ -199,7 +204,7 @@ public class UIManager : NetworkBehaviour
     public void TimeGameModeSelected()
     {
         gameModeSelected = "TimeGame";
-        //gameManager.SetGameMode(gameModeSelected);
+
         gameManager.CurrentGameMode = gameModeSelected;
         gamemodePanel.SetActive(false);
         timeSelectionPanel.SetActive(true);
@@ -225,7 +230,6 @@ public class UIManager : NetworkBehaviour
         foreach (var player in allPlayers)
         {
             player.GetComponent<PlayerController>().name = player.GetComponent<PlayerController>().networkName.Value.ToString();
-            //player.gameObject.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = name;
             if (player.GetComponent<NetworkObject>().IsOwner)
             {
                 player.GetComponent<PlayerController>().networkName.Value = name;
@@ -244,7 +248,7 @@ public class UIManager : NetworkBehaviour
         readyButton.SetActive(true);
         notReadyButton.SetActive(false);
         NotPlayerReadyServerRpc();
-        readyPlayersText.text = "Jugadores listos: " + networkReadyPlayers.Value + "/" + GameManager.Instance.GetNumberOfPlayers();
+        readyPlayersText.text = "Jugadores listos: " + networkReadyPlayers.Value + "/" + NetworkManager.Singleton.ConnectedClients.Count;
 
     }
     public void NotReadyPanel()
@@ -253,7 +257,7 @@ public class UIManager : NetworkBehaviour
         notReadyButton.SetActive(true);
         readyButton.SetActive(false);
         PlayerReadyServerRpc();
-        readyPlayersText.text = "Jugadores listos: " + networkReadyPlayers.Value + "/" + GameManager.Instance.GetNumberOfPlayers();
+        readyPlayersText.text = "Jugadores listos: " + networkReadyPlayers.Value + "/" + NetworkManager.Singleton.ConnectedClients.Count;
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -262,9 +266,9 @@ public class UIManager : NetworkBehaviour
         // Incrementar el contador de jugadores listos
         networkReadyPlayers.Value++;
         Debug.Log("Jugadores listos: " + networkReadyPlayers.Value);
-
+        UpdateReadyPlayersClientRpc(networkReadyPlayers.Value, NetworkManager.Singleton.ConnectedClients.Count);
         // Verificar si todos los jugadores están listos
-        if (networkReadyPlayers.Value >= GameManager.Instance.GetNumberOfPlayers())
+        if (networkReadyPlayers.Value >= NetworkManager.Singleton.ConnectedClients.Count)
         {
             StartGame();
         }
@@ -274,6 +278,7 @@ public class UIManager : NetworkBehaviour
     {
 
         networkReadyPlayers.Value--;
+        UpdateReadyPlayersClientRpc(networkReadyPlayers.Value, NetworkManager.Singleton.ConnectedClients.Count);
         Debug.Log("NotPlayerReadyServerRpc called. Current ready players: " + networkReadyPlayers.Value);
     }
 
@@ -323,4 +328,32 @@ public class UIManager : NetworkBehaviour
             NetworkManager.Singleton.Shutdown();
         }
     }
+    private void OnClientDisconnected(ulong clientId)
+    {
+        Debug.Log($"Jugador desconectado: {clientId}");
+
+        // Si estaba listo, decrementamos el contador (según lógica)
+        if (NetworkManager.IsServer)
+        {
+            // Evita que baje de 0
+            networkReadyPlayers.Value = Mathf.Max(0, networkReadyPlayers.Value - 1);
+        }
+
+        // Quitar del diccionario de nombres si está
+        if (allNetworkNames.ContainsKey(clientId))
+        {
+            allNetworkNames.Remove(clientId);
+        }
+
+        // Actualizar el UI en todos los clientes
+        UpdateReadyPlayersClientRpc(networkReadyPlayers.Value, NetworkManager.Singleton.ConnectedClients.Count);
+
+    }
+    [ClientRpc]
+    private void UpdateReadyPlayersClientRpc(int currentReady, int totalPlayers)
+    {
+        readyPlayersText.text = $"Jugadores listos: {currentReady}/{totalPlayers}";
+    }
+
+
 }

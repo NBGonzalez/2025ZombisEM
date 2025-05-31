@@ -35,13 +35,14 @@ public class NetworkEvents : MonoBehaviour
         if (disconectedText == null)
             disconectedText = GameObject.Find("DisconectedText").GetComponent<TextMeshProUGUI>();
 
-        NetworkManager.Singleton.StartCoroutine(ShowDisconectedClient(clientId));
+        NetworkManager.Singleton.StartCoroutine(ShowDisconectedClientRpc(clientId));
     }
-    IEnumerator ShowDisconectedClient(ulong clientId)
+    [ClientRpc]
+    IEnumerator ShowDisconectedClientRpc(ulong clientId)
     {
         disconectedText.enabled = true;
-        disconectedText.text = $"El jugador: {GameManager.Instance.GetPlayerName(clientId)} se ha desconectado.";
-        yield return new WaitForSeconds(3f);
+        disconectedText.text = $"El jugador: {GameManager.Instance.GetPlayerName(clientId)} se ha desconectado. Se debe de reiniciar el juego. Sorry :(";
+        yield return new WaitForSeconds(5f);
         disconectedText.enabled = false;
     }
 }
