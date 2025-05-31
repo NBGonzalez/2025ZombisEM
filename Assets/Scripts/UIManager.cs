@@ -54,7 +54,7 @@ public class UIManager : NetworkBehaviour
     {
 
         readyPlayersText = GameObject.Find("ReadyPlayersText").GetComponent<TextMeshProUGUI>();
-
+        gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
 
         //Si ya tenemos conexión de red, saltamos directo a la selección de modo
         if (hasNetworkConnection && NetworkManager.Singleton != null &&
