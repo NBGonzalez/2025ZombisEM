@@ -6222,6 +6222,7 @@ MonoBehaviour:
   STATUSPANEL: {fileID: 1070103845}
   titlePanel: {fileID: 1189235800}
   readyPlayersText: {fileID: 0}
+  prefab: {fileID: 8947290730586645348, guid: cb4f2926f9ddb634fb81430a923273a9, type: 3}
   readyButton: {fileID: 1917210244}
   notReadyButton: {fileID: 82251248}
 --- !u!114 &1661791418

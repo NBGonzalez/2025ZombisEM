@@ -610,12 +610,20 @@ public class LevelManager : NetworkBehaviour
     public void ReturnToMainMenu()
     {
         // Gestión del cursor
-        Cursor.lockState = CursorLockMode.Locked; // Bloquea el cursor
-        Cursor.visible = false; // Oculta el cursor
+        //Cursor.lockState = CursorLockMode.Locked; // Bloquea el cursor
+        //Cursor.visible = false; // Oculta el cursor
 
-        // Cargar la escena del menú principal
+        if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
+        {
+            var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+            foreach (var player in allPlayers)
+            {
+                player.GetComponent<NetworkObject>().Despawn();
+            }
 
-        SceneManager.LoadScene("MenuScene"); // Cambia "MenuScene" por el nombre de tu escena principal
+            NetworkManager.Singleton.SceneManager.LoadScene("MenuScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        }
+
     }
 
     #endregion

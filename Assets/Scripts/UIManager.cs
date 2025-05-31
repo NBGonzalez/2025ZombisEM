@@ -42,6 +42,8 @@ public class UIManager : NetworkBehaviour
 
     public TextMeshProUGUI readyPlayersText;
 
+    public GameObject prefab; // Prefab del jugador
+
     // Botones:
     public GameObject readyButton;
     public GameObject notReadyButton;
@@ -80,6 +82,25 @@ public class UIManager : NetworkBehaviour
             relayPanel.SetActive(true);
             titlePanel.SetActive(true);
             hasNetworkConnection = false;
+        }
+
+    }
+    private void Start()
+    {
+
+        Time.timeScale = 1f;
+        if (NetworkManager.Singleton.IsHost)
+        {
+            // Si somos el host, spawneamos los jugadores al iniciar
+            foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                GameObject player = Instantiate(prefab, new Vector3(0, 0, 0), Quaternion.identity);
+                NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
+                playerNetworkObject.SpawnAsPlayerObject(clientId);
+                //playerNetworkObject.ChangeOwnership(clientId); // Asigna la propiedad al cliente
+
+                player.GetComponent<PlayerController>().OnNetworkSpawn();
+            }
         }
 
     }
@@ -254,7 +275,7 @@ public class UIManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void NotPlayerReadyServerRpc()
     {
-        
+
         networkReadyPlayers.Value--;
         Debug.Log("NotPlayerReadyServerRpc called. Current ready players: " + networkReadyPlayers.Value);
     }
