@@ -81,15 +81,12 @@ public class PlayerController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-
-        if (IsOwner)
-        {
-            string savedName = GameManager.Instance.GetPlayerName(this.gameObject.GetComponent<NetworkObject>().OwnerClientId);
-            networkName.Value = savedName;
-        }
-
-        networkName.OnValueChanged += NameChange;
-        NameChange(default, networkName.Value);
+        //Debug.Log("Mi nombre es: ------------------ " + GameManager.Instance.networkPlayerNames[this.GetComponent<NetworkObject>().OwnerClientId]);
+        //name = GameManager.Instance.networkPlayerNames[this.GetComponent<NetworkObject>().OwnerClientId];
+        name = GameManager.Instance.GetPlayerName(this.GetComponent<NetworkObject>().OwnerClientId); // Obtener el nombre del jugador desde el GameManager
+        networkName.Value = name; // Asignar el nombre al NetworkVariable
+        this.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = name;
+        
     }
 
 

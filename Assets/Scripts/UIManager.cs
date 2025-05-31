@@ -224,17 +224,14 @@ public class UIManager : NetworkBehaviour
         var allPlayers = GameObject.FindGameObjectsWithTag("Player");
         foreach (var player in allPlayers)
         {
+            player.GetComponent<PlayerController>().name = player.GetComponent<PlayerController>().networkName.Value.ToString();
+            //player.gameObject.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = name;
             if (player.GetComponent<NetworkObject>().IsOwner)
             {
                 player.GetComponent<PlayerController>().networkName.Value = name;
                 gameManager.SetPlayerNameServerRpc(player.GetComponent<NetworkObject>().OwnerClientId, name);
-            }
-            else
-            {
-                player.gameObject.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = player.GetComponent<PlayerController>().networkName.Value.ToString();
-            }
-            //gameManager.SetPlayerNameClientRpc(player.GetComponent<NetworkObject>().OwnerClientId, name);
 
+            }
         }
 
         Debug.Log(name);

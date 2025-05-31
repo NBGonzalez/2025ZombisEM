@@ -120,21 +120,32 @@ public class GameManager : NetworkBehaviour
         return networkSeed.Value;
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void SetPlayerNameServerRpc(ulong clientId, string name)
     {
         // Aseguramos que el nombre se añade al diccionario en el cliente
-        networkPlayerNames.TryAdd(clientId, name);
+        if (!this.networkPlayerNames.ContainsKey(clientId))
+        {
+            this.networkPlayerNames.Add(clientId, name);
+        }
+        else
+        {
+            this.networkPlayerNames[clientId] = name; // Actualizamos el nombre si ya existe
+        }
         Debug.Log($"Nombre del jugador {name} establecido en cliente: {clientId}");
         SetPlayerNameClientRpc(clientId, name);
     }
 
-    [ClientRpc]
+    [ClientRpc(RequireOwnership = false)]
     void SetPlayerNameClientRpc(ulong clientId, string playerName)
     {
-        if (!networkPlayerNames.ContainsKey(clientId))
+        if (!this.networkPlayerNames.ContainsKey(clientId))
         {
-            networkPlayerNames.Add(clientId, playerName);
+            this.networkPlayerNames.Add(clientId, playerName);
+        }
+        else
+        {
+            this.networkPlayerNames[clientId] = playerName; // Actualizamos el nombre si ya existe
         }
 
         Debug.Log($"Nombre sincronizado en cliente {NetworkManager.Singleton.LocalClientId}: {clientId} -> {playerName}");
