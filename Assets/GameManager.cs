@@ -158,6 +158,17 @@ public class GameManager : NetworkBehaviour
         {
             return "Jugador Desconocido"; // Valor por defecto si no se encuentra el nombre
         }
+    }
 
+    [Rpc(SendTo.ClientsAndHost)]
+    public void ResetGameRequestRpc()
+    {
+        networkGameMode.Value = new FixedString64Bytes("Default");
+
+        networkSeed.Value = UnityEngine.Random.Range(0, 10000);
+        CoinsGenerated.Value = 0;
+        TotalCoinsCollected.Value = 0;
+        networkPlayerNames.Clear();
+        Debug.Log("Juego reiniciado y variables de red restablecidas.");
     }
 }

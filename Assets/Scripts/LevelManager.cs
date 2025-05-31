@@ -612,7 +612,7 @@ public class LevelManager : NetworkBehaviour
         // Gestión del cursor
         //Cursor.lockState = CursorLockMode.Locked; // Bloquea el cursor
         //Cursor.visible = false; // Oculta el cursor
-
+        GameManager.Instance.ResetGameRequestRpc(); // Resetea el GameManager
         if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
         {
             var allPlayers = GameObject.FindGameObjectsWithTag("Player");
@@ -620,7 +620,6 @@ public class LevelManager : NetworkBehaviour
             {
                 player.GetComponent<NetworkObject>().Despawn();
             }
-
             NetworkManager.Singleton.SceneManager.LoadScene("MenuScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
 
