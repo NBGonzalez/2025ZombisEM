@@ -563,6 +563,7 @@ public class LevelManager : NetworkBehaviour
         {
             isGameOver = true;
             remainingSeconds = 0;
+            VictoriaHumanosRequestRpc();
         }
 
         // Convertir remainingSeconds a minutos y segundos
@@ -590,6 +591,7 @@ public class LevelManager : NetworkBehaviour
             if (collected >= total)
             {
                 isGameOver = true;
+                VictoriaHumanosRequestRpc();
             }
         }
     }
@@ -649,6 +651,30 @@ public class LevelManager : NetworkBehaviour
                 else
                 {
                     victoriaText.enabled = true; // Mostrar mensaje de victoria
+                }
+                ShowGameOverPanel();
+            }
+
+        }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void VictoriaHumanosRequestRpc()
+    {
+        Debug.Log("Victoria de los humanos");
+        var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+        foreach (var player in allPlayers)
+        {
+            if (player.GetComponent<NetworkObject>().IsOwner)
+            {
+                if (player.GetComponent<PlayerController>().isZombie)
+                {
+                    derrotaText.enabled = true; // Mostrar mensaje de derrota
+                }
+                else
+                {
+                    victoriaText.enabled = true; // Mostrar mensaje de victoria
+                    
                 }
                 ShowGameOverPanel();
             }
