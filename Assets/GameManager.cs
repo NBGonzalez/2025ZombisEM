@@ -11,7 +11,7 @@ public class GameManager : NetworkBehaviour
     NetworkManager _networkManager;
     GameObject _playerPrefab;
 
-    int maxPlayers;
+    public int maxPlayers;
     int playerId;
     public static GameManager Instance { get; private set; }
 

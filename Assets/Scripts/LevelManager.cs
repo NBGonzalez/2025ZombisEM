@@ -65,6 +65,9 @@ public class LevelManager : NetworkBehaviour
 
     public GameManager gameManager;
 
+    int collected;
+    int total;
+
     #endregion
 
     #region Unity game loop methods
@@ -86,7 +89,8 @@ public class LevelManager : NetworkBehaviour
 
     private void Start()
     {
-
+        collected = GameManager.Instance.TotalCoinsCollected.Value;
+        total = GameManager.Instance.CoinsGenerated.Value;
         // Obtener el modo de juego desde GameManager
         if (gameManager.CurrentGameMode == "CoinGame")
         {
@@ -160,6 +164,8 @@ public class LevelManager : NetworkBehaviour
                     derrotaText = panel.Find("DerrotaText").GetComponent<TextMeshProUGUI>();
                     derrotaText.enabled = false; // Inicialmente oculto
                 }
+                
+                gameModeText.text = $"{collected}/{total}";
 
             }
         }
@@ -411,7 +417,7 @@ public class LevelManager : NetworkBehaviour
                 if (client.PlayerObject != null)
                     return;
             }
-
+            Debug.Log("Antes del Spawn: " + NetworkManager.Singleton.SpawnManager.SpawnedObjectsList.Count);
             // Instancia el nuevo jugador y lo asigna al cliente
             GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
             NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
@@ -419,6 +425,7 @@ public class LevelManager : NetworkBehaviour
 
             player.GetComponent<PlayerController>().OnNetworkSpawn();
             //player.GetComponent<PlayerController>().networkName.Value = playerName; // Asigna el nombre del jugador
+            Debug.Log("Despues del Spawn: " + NetworkManager.Singleton.SpawnManager.SpawnedObjectsList.Count);
 
             player.tag = "Player";
 
@@ -472,28 +479,61 @@ public class LevelManager : NetworkBehaviour
         if (humanSpawnPoints.Count <= 0) { return; }
 
         //Me hace un spawn por clientID
+        //if (NetworkManager.Singleton.IsHost)
+        //{
+        //    int spawnPointHuman = 0;
+        //    int spawnPointZombie = 0;
+
+        //    //Debug.Log($"Número de jugadores conectados: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
+        //    foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
+        //    {
+        //        if (spawnPointHuman < spawnPointZombie)
+        //        {
+        //            SpawnPlayer(humanSpawnPoints[spawnPointHuman], playerPrefab, clientId);
+        //            spawnPointHuman++;
+        //        }
+        //        else
+        //        {
+        //            SpawnPlayer(zombieSpawnPoints[spawnPointZombie], zombiePrefab, clientId);
+        //            spawnPointZombie++;
+        //        }
+        //        //Console.WriteLine("TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
+        //    }
+        //}
+
+        int nJugadores = NetworkManager.Singleton.ConnectedClientsIds.Count;
+        List<ulong> jugadores = NetworkManager.Singleton.ConnectedClientsIds.ToList();
+
+        int totalZombis = nJugadores / 2;
+        int totalHumanos = nJugadores / 2;
+
+        if (nJugadores % 2 != 0) totalZombis++; // Si impar, un zombi extra
+
+        System.Random rnd = new System.Random();
+        jugadores = jugadores.OrderBy(x => rnd.Next()).ToList(); // Mezcla aleatoriamente la lista
+
+        int zombisSpawneados = 0;
+        int humanosSpawneados = 0;
+
         if (NetworkManager.Singleton.IsHost)
         {
-            int spawnPointHuman = 0;
-            int spawnPointZombie = 0;
-
-            //Debug.Log($"Número de jugadores conectados: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
-            foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            for (int i = 0; i < jugadores.Count; i++)
             {
-                if (spawnPointHuman < spawnPointZombie)
-                {
-                    SpawnPlayer(humanSpawnPoints[spawnPointHuman], playerPrefab, clientId);
-                    spawnPointHuman++;
-                }
-                else
-                {
-                    SpawnPlayer(zombieSpawnPoints[spawnPointZombie], zombiePrefab, clientId);
-                    spawnPointZombie++;
-                }
-                //Console.WriteLine("TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
+                ulong clientId = jugadores[i];
 
+                if (zombisSpawneados < totalZombis)
+                {
+                    SpawnPlayer(humanSpawnPoints[i], zombiePrefab, clientId);
+                    zombisSpawneados++;
+                }
+                else if (humanosSpawneados < totalHumanos)
+                {
+                    SpawnPlayer(humanSpawnPoints[i], playerPrefab, clientId);
+                    humanosSpawneados++;
+                }
             }
         }
+
 
 
         //Debug.Log($"Personaje jugable instanciado en {humanSpawnPoints[0]}");
@@ -565,9 +605,14 @@ public class LevelManager : NetworkBehaviour
         // Comprobar si el tiempo ha llegado a cero
         if (remainingSeconds <= 0)
         {
-            isGameOver = true;
-            remainingSeconds = 0;
-            VictoriaHumanosRequestRpc();
+            //isGameOver = true;
+            var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+            
+            if (allPlayers.Count() != GameManager.Instance.maxPlayers)
+            {
+                remainingSeconds = 0;
+                VictoriaHumanosRequestRpc();
+            }
         }
 
         // Convertir remainingSeconds a minutos y segundos
@@ -588,14 +633,19 @@ public class LevelManager : NetworkBehaviour
 
         if (gameModeText != null)
         {
-            int collected = GameManager.Instance.TotalCoinsCollected.Value;
-            int total = GameManager.Instance.CoinsGenerated.Value;
+            collected = GameManager.Instance.TotalCoinsCollected.Value;
+            total = GameManager.Instance.CoinsGenerated.Value;
             gameModeText.text = $"{collected}/{total}";
 
             if (collected >= total)
             {
-                isGameOver = true;
-                VictoriaHumanosRequestRpc();
+                var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+                if(allPlayers.Count() != GameManager.Instance.maxPlayers)
+                {
+                    VictoriaHumanosRequestRpc();
+                }
+                //isGameOver = true;
+                
             }
         }
     }
@@ -678,7 +728,7 @@ public class LevelManager : NetworkBehaviour
                 else
                 {
                     victoriaText.enabled = true; // Mostrar mensaje de victoria
-                    
+
                 }
                 ShowGameOverPanel();
             }

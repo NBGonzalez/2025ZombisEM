@@ -19,7 +19,7 @@ public class UIManager : NetworkBehaviour
     public TMP_InputField inputJoinCode;
     public string name;
 
-    public const int maxConnections = 10;
+    public const int maxConnections = 4;
     public string joinCode = "Enter room code...";
     public string gameModeSelected;
 
