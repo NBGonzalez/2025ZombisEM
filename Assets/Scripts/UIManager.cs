@@ -11,6 +11,7 @@ using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
 using UnityEditor;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 
 public class UIManager : NetworkBehaviour
 {
@@ -27,6 +28,7 @@ public class UIManager : NetworkBehaviour
     private NetworkVariable<int> networkReadyPlayers = new NetworkVariable<int>(
         0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    public Dictionary<ulong, string> allNetworkNames = new Dictionary<ulong, string>();
 
     // Paneles:
     public GameObject relayPanel;
@@ -204,14 +206,16 @@ public class UIManager : NetworkBehaviour
             if (player.GetComponent<NetworkObject>().IsOwner)
             {
                 player.GetComponent<PlayerController>().networkName.Value = name;
-                GameManager.Instance.SetPlayerName(name, player.GetComponent<NetworkObject>().OwnerClientId);
+                gameManager.SetPlayerNameServerRpc(player.GetComponent<NetworkObject>().OwnerClientId, name);
             }
             else
             {
                 player.gameObject.transform.GetChild(4).GetChild(0).GetComponent<TextMeshProUGUI>().text = player.GetComponent<PlayerController>().networkName.Value.ToString();
             }
+            //gameManager.SetPlayerNameClientRpc(player.GetComponent<NetworkObject>().OwnerClientId, name);
 
         }
+
         Debug.Log(name);
         readyPanel.SetActive(true);
     }

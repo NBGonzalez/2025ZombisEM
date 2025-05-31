@@ -43,6 +43,10 @@ public class LevelManager : NetworkBehaviour
     private TextMeshProUGUI zombiesText;
     private TextMeshProUGUI gameModeText;
 
+    public TextMeshProUGUI victoriaText;
+    public TextMeshProUGUI victoriaParcialText;
+    public TextMeshProUGUI derrotaText;
+
     private int CoinsGenerated = 0;
 
     public string PlayerPrefabName => playerPrefab.name;
@@ -82,12 +86,13 @@ public class LevelManager : NetworkBehaviour
 
     private void Start()
     {
+
         // Obtener el modo de juego desde GameManager
-        if(gameManager.CurrentGameMode == "CoinGame")
+        if (gameManager.CurrentGameMode == "CoinGame")
         {
             gameMode = GameMode.Monedas;
         }
-        else if(gameManager.CurrentGameMode == "TimeGame")
+        else if (gameManager.CurrentGameMode == "TimeGame")
         {
             gameMode = GameMode.Tiempo;
         }
@@ -96,7 +101,7 @@ public class LevelManager : NetworkBehaviour
 
         // El GameManager tiene el numero de jugadores, saca cuentas para saber cuantos zombies y humanos spawnear despues.
         totalPlayers = gameManager.GetNumberOfPlayers();
-        if(totalPlayers % 2 == 0)
+        if (totalPlayers % 2 == 0)
         {
             numberOfHumans = totalPlayers / 2;
             numberOfZombies = totalPlayers / 2;
@@ -137,6 +142,25 @@ public class LevelManager : NetworkBehaviour
                 {
                     gameModeText = gameModeTextTransform.GetComponent<TextMeshProUGUI>();
                 }
+
+                if (victoriaText == null)
+                {
+                    victoriaText = panel.Find("VictoriaText").GetComponent<TextMeshProUGUI>();
+                    victoriaText.enabled = false; // Inicialmente oculto
+                }
+
+                if (victoriaParcialText == null)
+                {
+                    victoriaParcialText = panel.Find("VictoriaParcialText").GetComponent<TextMeshProUGUI>();
+                    victoriaParcialText.enabled = false; // Inicialmente oculto
+                }
+
+                if (derrotaText == null)
+                {
+                    derrotaText = panel.Find("DerrotaText").GetComponent<TextMeshProUGUI>();
+                    derrotaText.enabled = false; // Inicialmente oculto
+                }
+
             }
         }
 
@@ -212,7 +236,7 @@ public class LevelManager : NetworkBehaviour
         GameObject currentPlayer = GameObject.FindGameObjectWithTag("Player");
         ChangeToZombie(currentPlayer, true);
     }
-    
+
     public void ChangeToZombie(GameObject human, bool enabled)
     {
         Debug.Log("Cambiando a Zombie");
@@ -247,8 +271,16 @@ public class LevelManager : NetworkBehaviour
                 playerController.enabled = enabled;
                 playerController.isZombie = true; // Cambiar el estado a zombie
                 playerController.uniqueID = uniqueID; // Mantener el identificador único
+                playerController.convertido.Value = true; // Marcar como convertido a mitad de partida
                 numberOfHumans--; // Reducir el número de humanos
                 numberOfZombies++; // Aumentar el número de zombis
+
+                if (numberOfHumans == 0)
+                {
+                    VictoriaZombiesRequestRpc(Id);
+                }
+
+
 
                 Debug.Log("ME VOY A METER EN EL RPC DE LOS COJONES!!!!!!!!!!!!!");
                 UpdateHumansZombiesClientRpc(numberOfHumans, numberOfZombies);
@@ -380,7 +412,7 @@ public class LevelManager : NetworkBehaviour
             GameObject player = Instantiate(prefab, spawnPosition, Quaternion.identity);
             NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
             playerNetworkObject.SpawnWithOwnership(clientId); // Asigna la propiedad al cliente
-            
+
             player.GetComponent<PlayerController>().OnNetworkSpawn();
             //player.GetComponent<PlayerController>().networkName.Value = playerName; // Asigna el nombre del jugador
 
@@ -444,7 +476,7 @@ public class LevelManager : NetworkBehaviour
             Debug.Log($"Número de jugadores conectados: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
             foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
             {
-                if(spawnPointHuman < spawnPointZombie)
+                if (spawnPointHuman < spawnPointZombie)
                 {
                     SpawnPlayer(humanSpawnPoints[spawnPointHuman], playerPrefab, clientId);
                     spawnPointHuman++;
@@ -455,7 +487,7 @@ public class LevelManager : NetworkBehaviour
                     spawnPointZombie++;
                 }
                 //Console.WriteLine("TE DIGO EN QUE PUNTO HICE SPAWN: " + humanSpawnPoints[spawnPoint]);
-                
+
             }
         }
 
@@ -582,11 +614,40 @@ public class LevelManager : NetworkBehaviour
         Cursor.visible = false; // Oculta el cursor
 
         // Cargar la escena del menú principal
-        
+
         SceneManager.LoadScene("MenuScene"); // Cambia "MenuScene" por el nombre de tu escena principal
     }
 
     #endregion
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void VictoriaZombiesRequestRpc(ulong ID)
+    {
+        Debug.Log("Victoria de los zombis");
+        var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+        foreach (var player in allPlayers)
+        {
+            if (player.GetComponent<NetworkObject>().IsOwner)
+            {
+                bool haSidoConvertido = player.GetComponent<PlayerController>().convertido.Value;
+
+                if (player.GetComponent<NetworkObject>().OwnerClientId == ID)
+                {
+                    derrotaText.enabled = true; // Mostrar mensaje de derrota
+                }
+                else if (haSidoConvertido)
+                {
+                    victoriaParcialText.enabled = true; // Mostrar mensaje de victoria parcial
+                }
+                else
+                {
+                    victoriaText.enabled = true; // Mostrar mensaje de victoria
+                }
+                ShowGameOverPanel();
+            }
+
+        }
+    }
 
 }
 

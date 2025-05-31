@@ -6,6 +6,7 @@ using System;
 using Unity.Collections;
 using System.Runtime.ConstrainedExecution;
 using UnityEngine.UIElements;
+using System.Collections.Generic;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -35,8 +36,14 @@ public class PlayerController : NetworkBehaviour
     public string name;
     public GameObject textName;
 
+    public NetworkVariable<bool> convertido = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
+    //public bool convertido = false; // Para saber si el jugador ha sido convertido en zombie a mitad de la partida
+
+    public Dictionary<ulong, string> allNetworkNames = new Dictionary<ulong, string>();
+
     void Start()
     {
+        
         // Buscar el objeto "CanvasPlayer" en la escena
         GameObject canvas = GameObject.Find("CanvasPlayer");
 
@@ -77,7 +84,7 @@ public class PlayerController : NetworkBehaviour
 
         if (IsOwner)
         {
-            string savedName = GameManager.Instance.GetPlayerName(NetworkManager.Singleton.LocalClientId);
+            string savedName = GameManager.Instance.GetPlayerName(this.gameObject.GetComponent<NetworkObject>().OwnerClientId);
             networkName.Value = savedName;
         }
 

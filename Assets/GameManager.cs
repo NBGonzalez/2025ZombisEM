@@ -23,7 +23,7 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<int> CoinsGenerated = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
     public NetworkVariable<int> TotalCoinsCollected = new(writePerm: NetworkVariableWritePermission.Server, readPerm: NetworkVariableReadPermission.Everyone);
 
-    ConcurrentDictionary<ulong, string> networkPlayerNames = new ConcurrentDictionary<ulong, string>();
+    [SerializeField] public Dictionary<ulong, string> networkPlayerNames = new Dictionary<ulong, string>();
 
 
     private void Awake()
@@ -118,6 +118,26 @@ public class GameManager : NetworkBehaviour
     public int GetNetworkSeed()
     {
         return networkSeed.Value;
+    }
+
+    [ServerRpc]
+    public void SetPlayerNameServerRpc(ulong clientId, string name)
+    {
+        // Aseguramos que el nombre se añade al diccionario en el cliente
+        networkPlayerNames.TryAdd(clientId, name);
+        Debug.Log($"Nombre del jugador {name} establecido en cliente: {clientId}");
+        SetPlayerNameClientRpc(clientId, name);
+    }
+
+    [ClientRpc]
+    void SetPlayerNameClientRpc(ulong clientId, string playerName)
+    {
+        if (!networkPlayerNames.ContainsKey(clientId))
+        {
+            networkPlayerNames.Add(clientId, playerName);
+        }
+
+        Debug.Log($"Nombre sincronizado en cliente {NetworkManager.Singleton.LocalClientId}: {clientId} -> {playerName}");
     }
 
     public void SetPlayerName(string name, ulong clientId)
